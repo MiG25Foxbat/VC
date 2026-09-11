@@ -1,0 +1,28 @@
+# Пример формата. Реальный профиль — server/profiles/default.yaml,
+# он в .gitignore и в этот набор не входит, чтобы не затереть то,
+# что уже заполнено руками.
+name: Имя Фамилия
+contacts:
+  telegram: "@nickname"
+  email: "почта@example.com"
+  phone: "+7 000 000-00-00"
+location: Москва
+format: удалённо, около 35 часов в неделю
+languages:
+  - русский родной
+  - английский B2
+skills:
+  automation: [Python, SQL, Linux, "Google Scripts", salebot, "Telegram Bot API"]
+  operations: ["Битрикс24", "Google Workspace", "Microsoft Office"]
+achievements:
+  - text: собрала базу на 30000 контактов парсингом
+    number: 30000
+  - text: настроила отбор до 2000 человек в день
+    number: 2000
+experience:
+  - role: Автоматизация и Telegram-боты
+    org: проектная работа с предпринимателями
+    period: "2023 — настоящее время"
+    points:
+      - ИИ-бот с базой данных, подбор товара под покупателя
+      - Автоматизация отбора людей, сбор анкет в базу без ручного ввода

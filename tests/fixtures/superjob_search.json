@@ -1,0 +1,45 @@
+{
+  "objects": [
+    {
+      "id": 40000001,
+      "profession": "Бизнес-ассистент руководителя",
+      "firm_name": "ООО Тестовая Компания",
+      "payment_from": 90000,
+      "payment_to": 130000,
+      "currency": "rub",
+      "date_published": 1767225600,
+      "work": "Ведение календаря, организация встреч, контроль поручений.",
+      "address": "г Москва, ул Тестовая, 1",
+      "town": { "id": 4, "title": "Москва" },
+      "type_of_work": { "id": 6, "title": "Полный рабочий день" },
+      "agreement": false,
+      "link": "https://www.superjob.ru/vakansii/biznes-assistent-40000001.html"
+    },
+    {
+      "id": 40000002,
+      "profession": "Ассистент отдела продаж",
+      "firm_name": "ИП Тестов Тест Тестович",
+      "payment_from": 0,
+      "payment_to": 0,
+      "currency": "rub",
+      "date_published": 1767312000,
+      "work": "Помощь менеджерам отдела продаж, работа с CRM.",
+      "address": null,
+      "town": { "id": 14, "title": "Санкт-Петербург" },
+      "type_of_work": { "id": 6, "title": "Полный рабочий день" },
+      "agreement": true,
+      "link": "https://www.superjob.ru/vakansii/assistent-otdela-prodazh-40000002.html"
+    },
+    {
+      "id": 40000003,
+      "profession": "Без ссылки — битая запись",
+      "firm_name": "Без ссылки ООО",
+      "payment_from": 50000,
+      "payment_to": 50000,
+      "currency": "rub",
+      "town": { "id": 4, "title": "Москва" }
+    }
+  ],
+  "total": 3,
+  "more": false
+}

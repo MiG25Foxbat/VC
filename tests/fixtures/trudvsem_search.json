@@ -1,0 +1,38 @@
+{
+  "results": {
+    "vacancies": [
+      {
+        "vacancy": {
+          "id": "1234567",
+          "job-name": "Бизнес-ассистент собственника",
+          "salary_min": "80000",
+          "salary_max": "120000",
+          "vac_url": "https://trudvsem.ru/vacancy/card/0000000/1234567",
+          "creation-date": "2026-09-01",
+          "duty": "Ведение календаря руководителя, организация встреч, контроль задач",
+          "employment": "полная",
+          "company": { "name": "ООО Ромашка", "inn": "7712345678" },
+          "region": { "name": "г Москва" }
+        }
+      },
+      {
+        "vacancy": {
+          "id": "1234568",
+          "job-name": "Ассистент предпринимателя",
+          "salary_min": "60000",
+          "vac_url": "https://trudvsem.ru/vacancy/card/0000000/1234568",
+          "duty": "Помощь в операционных задачах интернет-магазина",
+          "company": { "name": "ИП Иванов Иван Иванович" },
+          "region": { "name": "г Санкт-Петербург" }
+        }
+      },
+      {
+        "vacancy": {
+          "id": "bad-record-missing-title",
+          "vac_url": "https://trudvsem.ru/vacancy/card/0000000/000",
+          "company": { "name": "Без названия" }
+        }
+      }
+    ]
+  }
+}

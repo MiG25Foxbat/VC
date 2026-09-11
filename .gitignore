@@ -1,0 +1,25 @@
+# секреты
+.env
+.env.local
+server/profiles/*.yaml
+!server/profiles/example.yaml
+
+# личные заметки для Claude Code
+CLAUDE.local.md
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+server/.python-version
+
+# flutter
+app/build/
+app/.dart_tool/
+app/.flutter-plugins*
+*.iml
+
+# прочее
+.DS_Store
