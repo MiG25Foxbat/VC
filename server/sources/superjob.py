@@ -2,24 +2,22 @@
 X-Api-App-Id (секретный ключ приложения, регистрация бесплатная на
 https://api.superjob.ru/register, ключ смотреть на https://api.superjob.ru/info).
 
-Схема ответа сверена по официальной документации на 2026-09-12
-(https://api.superjob.ru/, раздел «Поиск вакансий»), метод
-GET /2.0/vacancies/, поле objects[]:
+Схема ответа сверена по официальной документации и вживую (2026-09-12,
+рабочий ключ), метод GET /2.0/vacancies/, поле objects[]:
 "id", "profession", "firm_name", "payment_from"/"payment_to" (int,
 0 означает «оклад по договорённости», не 0 рублей), "currency",
-"date_published" (unixtime), "work", "address", "town": {"title"},
-"link". У SuperJob нет ИНН работодателя в вакансии — цепочка
-обогащения по названию компании уже умеет резолвить ИНН через
-DaData suggest (server/enrich/company.py), поэтому company_inn
-всегда None для этого источника, это не баг.
+"date_published" (unixtime), "address", "town": {"title"}, "link".
+У SuperJob нет ИНН работодателя в вакансии — цепочка обогащения по
+названию компании уже умеет резолвить ИНН через DaData suggest
+(server/enrich/company.py), поэтому company_inn всегда None для
+этого источника, это не баг.
 
-Живой запрос (scripts/inspect_trudvsem.py — аналога для superjob нет
-в архиве) с ключом из .env вернул 403 "Приложение с переданным ключом
-не найдено": значение SUPERJOB_APP_ID в .env — 4-значное число,
-похожее на client_id, а не на секретный ключ приложения (который
-обычно длиннее, как DADATA_TOKEN). Живьём эта функция не проверена,
-только по документации — прогнать против реального ключа при первой
-возможности.
+Расхождение с документацией, найденное на живых данных: поле "work"
+(должностные обязанности, по описанию в документации) у всех
+проверенных вакансий пустое — реальный текст вакансии лежит в
+"candidat" ("требования к кандидату" по документации, но по факту
+туда же сваливают весь текст вакансии), иногда ещё в "compensation".
+Берём первое непустое из трёх.
 """
 from __future__ import annotations
 
@@ -81,7 +79,7 @@ def _parse_one(v: dict) -> Vacancy | None:
         location=v.get("address") or town.get("title") or None,
         url=str(url),
         published_at=_unixtime_to_date(v.get("date_published")),
-        description=v.get("work") or None,
+        description=v.get("work") or v.get("candidat") or v.get("compensation") or None,
         source="superjob",
         company_name=v.get("firm_name") or None,
         company_inn=None,  # SuperJob не отдаёт ИНН — резолвится по имени через DaData

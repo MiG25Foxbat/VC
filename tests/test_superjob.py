@@ -49,10 +49,14 @@ def test_parses_fixture_and_skips_broken_records(monkeypatch):
     assert first.url.startswith("https://www.superjob.ru")
     assert first.source == "superjob"
     assert first.company_inn is None  # SuperJob не отдаёт ИНН — резолвится через DaData
+    # живые ответы: "work" почти всегда пустой, текст лежит в "candidat"
+    assert first.description == "Ведение календаря, организация встреч, контроль поручений."
 
     second = items[1]
     assert second.salary_from is None  # payment_from=0 при agreement=true — не оклад в 0 рублей
     assert second.salary_to is None
+    # ни work, ни candidat не заполнены — берём compensation
+    assert second.description == "Помощь менеджерам отдела продаж, работа с CRM."
 
 
 def test_empty_objects_returns_empty_list(monkeypatch):
