@@ -14,6 +14,14 @@ def test_health():
     assert resp.json() == {"status": "ok"}
 
 
+def test_cors_allows_browser_clients():
+    # Flutter web (и любой другой браузерный клиент) идёт с другого origin —
+    # без этого заголовка браузер молча блокирует ответ как "Failed to fetch",
+    # хотя сервер его честно обработал. Поймано вживую на реальном клиенте.
+    resp = client.get("/health", headers={"Origin": "http://localhost:8734"})
+    assert resp.headers.get("access-control-allow-origin") == "*"
+
+
 def test_search_returns_items_from_trudvsem():
     fake = Vacancy(
         id="1",

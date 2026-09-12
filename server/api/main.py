@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
@@ -27,6 +28,16 @@ cache = TTLCache(ttl_seconds=settings.cache_ttl_seconds)
 PROFILES_DIR = Path(__file__).resolve().parent.parent / "profiles"
 
 app = FastAPI(title="Агент откликов", version="0.1.0")
+
+# Клиент — Flutter web (и любой другой браузерный клиент) с другого
+# origin. API без авторизации и без cookie-сессий, скрывать тут нечего —
+# ограничивать origin означало бы только ломать легитимных клиентов.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # ---- схемы запросов ---------------------------------------------------
