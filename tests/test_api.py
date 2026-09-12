@@ -119,6 +119,46 @@ def test_search_superjob_failure_does_not_break_trudvsem_results():
     assert data["errors"] == [{"source": "superjob", "reason": "SUPERJOB_APP_ID не задан"}]
 
 
+def test_prepare_uses_profile_text_from_request_over_server_file():
+    # Бэкенд без состояния и на Render server/profiles/default.yaml просто
+    # нет — это личные данные, в git не коммитятся. Клиент обязан прислать
+    # текст профиля сам, а не полагаться на файл на сервере.
+    import dataclasses
+
+    import server.api.main as main_module
+
+    captured = {}
+
+    async def fake_write_letter(profile, vacancy, dossier, *, settings):
+        captured["profile"] = profile
+        from server.models import Letter
+
+        return Letter(text="письмо", facts=[])
+
+    async def fake_write_brief(vacancy, dossier, *, settings):
+        from server.models import Brief
+
+        return Brief()
+
+    fake_settings = dataclasses.replace(main_module.settings, llm_api_key="fake-key")
+    with (
+        patch.object(main_module, "settings", new=fake_settings),
+        patch("server.api.main.generate.write_letter", new=fake_write_letter),
+        patch("server.api.main.generate.write_brief", new=fake_write_brief),
+    ):
+        payload = {
+            "vacancy_id": "profile-text-1",
+            "source": "trudvsem",
+            "title": "Бизнес-ассистент",
+            "url": "https://trudvsem.ru/x",
+            "profile_text": "name: Тест Тестов\ncontacts: {}\n",
+        }
+        resp = client.post("/prepare", json=payload)
+
+    assert resp.status_code == 200
+    assert captured["profile"] == "name: Тест Тестов\ncontacts: {}\n"
+
+
 def test_prepare_without_llm_key_returns_card_without_letter():
     payload = {
         "vacancy_id": "1",

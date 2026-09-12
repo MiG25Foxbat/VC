@@ -77,6 +77,7 @@ class PrepareRequest(BaseModel):
     vacancy_id: str
     source: str
     profile_id: str = "default"
+    profile_text: str | None = None
     title: str
     url: str
     company_name: str | None = None
@@ -187,7 +188,7 @@ async def prepare(req: PrepareRequest) -> ResultCard | JSONResponse:
     brief = None
     if settings.llm_api_key:
         dossier_block = _build_dossier_block(vacancy, company, owner)
-        profile_text = _load_profile(req.profile_id)
+        profile_text = req.profile_text or _load_profile(req.profile_id)
         try:
             letter = await generate.write_letter(
                 profile_text, vacancy.model_dump_json(), dossier_block, settings=settings
