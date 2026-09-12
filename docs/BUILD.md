@@ -9,7 +9,11 @@
 ```
 LLM_PROVIDER=google            # google | cerebras | groq | openrouter
 LLM_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
-LLM_MODEL=gemini-3.6-flash      # gemini-2.5-flash снят с публичного доступа (2026-09)
+LLM_MODEL=gemini-3.1-flash-lite  # gemini-2.5-flash снят с публичного доступа (2026-09);
+                                 # lite-модель выбрана ради более высокой суточной квоты
+                                 # бесплатного тарифа — у flash без lite лимит 20 запросов
+                                 # в сутки на модель (не в минуту), этого мало для /prepare,
+                                 # который делает два вызова модели за карточку
 LLM_API_KEY=
 
 DADATA_TOKEN=                  # подсказки и выписка по организациям

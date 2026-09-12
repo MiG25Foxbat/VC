@@ -30,7 +30,7 @@ def load_settings() -> Settings:
             "LLM_BASE_URL",
             "https://generativelanguage.googleapis.com/v1beta/openai/",
         ),
-        llm_model=os.getenv("LLM_MODEL", "gemini-3.6-flash"),
+        llm_model=os.getenv("LLM_MODEL", "gemini-3.1-flash-lite"),
         llm_api_key=os.getenv("LLM_API_KEY", ""),
         dadata_token=os.getenv("DADATA_TOKEN", ""),
         superjob_app_id=os.getenv("SUPERJOB_APP_ID", ""),
