@@ -15,9 +15,7 @@ class PreparedCardsStore {
     final raw = prefs.getString(_key);
     if (raw == null || raw.isEmpty) return [];
     final decoded = jsonDecode(raw) as List<dynamic>;
-    return decoded
-        .map((e) => QueueRecord.fromJson(e as Map<String, dynamic>))
-        .toList(growable: false);
+    return decoded.map((e) => QueueRecord.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<void> _saveAll(List<QueueRecord> records) async {
