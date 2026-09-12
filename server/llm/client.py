@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 import json
 
 import httpx
@@ -12,6 +13,9 @@ import httpx
 
 class LLMError(Exception):
     pass
+
+
+RETRY_ATTEMPTS = 3
 
 
 async def chat_json(
@@ -23,7 +27,13 @@ async def chat_json(
     temperature: float = 0.3,
     timeout: float = 60.0,
 ) -> dict:
-    """Отправляет промпт, ожидает единственный JSON-объект в ответе."""
+    """Отправляет промпт, ожидает единственный JSON-объект в ответе.
+
+    Повторяет запрос при обрыве соединения: на практике TLS-рукопожатие
+    к generativelanguage.googleapis.com иногда рвётся с пустым
+    httpx.ConnectError — не лимит и не авторизация, просто сетевая
+    нестабильность, второй попытки обычно достаточно.
+    """
     if not api_key:
         raise LLMError("LLM_API_KEY не задан")
 
@@ -35,12 +45,19 @@ async def chat_json(
     }
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
-    async with httpx.AsyncClient(timeout=timeout) as client:
+    last_exc: httpx.HTTPError | None = None
+    for attempt in range(RETRY_ATTEMPTS):
         try:
-            resp = await client.post(url, headers=headers, json=payload)
-            resp.raise_for_status()
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                resp = await client.post(url, headers=headers, json=payload)
+                resp.raise_for_status()
+            break
         except httpx.HTTPError as exc:
-            raise LLMError(str(exc)) from exc
+            last_exc = exc
+            if attempt < RETRY_ATTEMPTS - 1:
+                await asyncio.sleep(1.5 * (attempt + 1))
+    else:
+        raise LLMError(str(last_exc)) from last_exc
 
     data = resp.json()
     try:
