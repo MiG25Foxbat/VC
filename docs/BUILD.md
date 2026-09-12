@@ -9,7 +9,7 @@
 ```
 LLM_PROVIDER=google            # google | cerebras | groq | openrouter
 LLM_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
-LLM_MODEL=gemini-2.5-flash
+LLM_MODEL=gemini-3.6-flash      # gemini-2.5-flash снят с публичного доступа (2026-09)
 LLM_API_KEY=
 
 DADATA_TOKEN=                  # подсказки и выписка по организациям
