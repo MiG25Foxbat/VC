@@ -47,8 +47,8 @@ MAX_CONCURRENT_SOURCES=6
   "remote": true, "salary_from": 80000, "sources": ["trudvsem", "superjob"] }
 
 // ответ
-{ "items": [ { "id", "title", "company_name", "salary",
-               "location", "url", "published_at", "source" } ],
+{ "items": [ { "id", "title", "company_name", "company_inn", "salary_from", "salary_to",
+               "location", "url", "published_at", "description", "source" } ],
   "errors": [ { "source": "superjob", "reason": "timeout" } ] }
 ```
 

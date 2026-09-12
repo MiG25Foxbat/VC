@@ -50,6 +50,7 @@ class SearchResponseItem(BaseModel):
     location: str | None
     url: str
     published_at: str | None
+    description: str | None
     source: str
 
 
@@ -136,6 +137,7 @@ async def search(req: SearchRequest) -> SearchResponse:
             location=v.location,
             url=v.url,
             published_at=v.published_at,
+            description=v.description,
             source=v.source,
         )
         for v in items

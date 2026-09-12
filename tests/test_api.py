@@ -32,6 +32,23 @@ def test_search_returns_items_from_trudvsem():
     assert data["errors"] == []
 
 
+def test_search_passes_through_vacancy_description():
+    fake = Vacancy(
+        id="1",
+        title="Бизнес-ассистент",
+        url="https://trudvsem.ru/x",
+        source="trudvsem",
+        company_name="ООО Ромашка",
+        company_inn="7712345678",
+        description="Ведение календаря руководителя, контроль поручений.",
+    )
+    with patch("server.api.main.trudvsem.search", new=AsyncMock(return_value=[fake])):
+        resp = client.post("/search", json={"query": "ассистент"})
+
+    assert resp.status_code == 200
+    assert resp.json()["items"][0]["description"] == "Ведение календаря руководителя, контроль поручений."
+
+
 def test_search_source_failure_does_not_break_response():
     from server.sources.base import SourceUnavailable
 
