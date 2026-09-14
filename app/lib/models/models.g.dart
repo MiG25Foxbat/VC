@@ -375,6 +375,54 @@ Map<String, dynamic> _$PrepareRequestBodyToJson(_PrepareRequestBody instance) =>
       'description': instance.description,
     };
 
+_ExtractRequestBody _$ExtractRequestBodyFromJson(Map<String, dynamic> json) =>
+    _ExtractRequestBody(rawText: json['raw_text'] as String);
+
+Map<String, dynamic> _$ExtractRequestBodyToJson(_ExtractRequestBody instance) =>
+    <String, dynamic>{'raw_text': instance.rawText};
+
+_ExtractedVacancy _$ExtractedVacancyFromJson(Map<String, dynamic> json) =>
+    _ExtractedVacancy(
+      title: json['title'] as String?,
+      salaryFrom: (json['salary_from'] as num?)?.toInt(),
+      salaryTo: (json['salary_to'] as num?)?.toInt(),
+      currency: json['currency'] as String?,
+      employment: json['employment'] as String?,
+      remote: json['remote'] as bool?,
+      location: json['location'] as String?,
+      companyName: json['company_name'] as String?,
+      duties:
+          (json['duties'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+      requirements:
+          (json['requirements'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+      conditions:
+          (json['conditions'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+    );
+
+Map<String, dynamic> _$ExtractedVacancyToJson(_ExtractedVacancy instance) =>
+    <String, dynamic>{
+      'title': instance.title,
+      'salary_from': instance.salaryFrom,
+      'salary_to': instance.salaryTo,
+      'currency': instance.currency,
+      'employment': instance.employment,
+      'remote': instance.remote,
+      'location': instance.location,
+      'company_name': instance.companyName,
+      'duties': instance.duties,
+      'requirements': instance.requirements,
+      'conditions': instance.conditions,
+    };
+
 _QueueRecord _$QueueRecordFromJson(Map<String, dynamic> json) => _QueueRecord(
   vacancy: SearchResultItem.fromJson(json['vacancy'] as Map<String, dynamic>),
   card: ResultCard.fromJson(json['card'] as Map<String, dynamic>),

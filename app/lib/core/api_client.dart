@@ -47,6 +47,21 @@ class ApiClient {
     return SearchResult.fromJson(jsonDecode(utf8.decode(resp.bodyBytes)) as Map<String, dynamic>);
   }
 
+  /// Разбор вручную вставленного текста вакансии (L3 каскада источников).
+  /// Один вызов модели — короче, чем /prepare, но сеть та же самая
+  /// нестабильная линия до провайдера, так что таймаут не меньше.
+  Future<ExtractedVacancy> extractVacancy(String rawText) async {
+    final resp = await _client
+        .post(
+          _uri('/extract'),
+          headers: _jsonHeaders,
+          body: jsonEncode(ExtractRequestBody(rawText: rawText).toJson()),
+        )
+        .timeout(const Duration(seconds: 70));
+    _ensureOk(resp);
+    return ExtractedVacancy.fromJson(jsonDecode(utf8.decode(resp.bodyBytes)) as Map<String, dynamic>);
+  }
+
   /// /prepare — тяжёлая операция (обогащение + модель), до минуты.
   /// Таймаут клиента чуть шире, чем обещание сервера: холодный старт
   /// Render после сна добавляет свои секунды сверху.
@@ -75,11 +90,15 @@ class ApiClient {
     try {
       final decoded = jsonDecode(utf8.decode(resp.bodyBytes));
       if (decoded is Map && decoded['error'] is Map) {
+        // документированный в BUILD.md формат { "error": { "message" } }
         detail = (decoded['error']['message'] ?? detail).toString();
+      } else if (decoded is Map && decoded['detail'] != null) {
+        // то, что реально отдаёт FastAPI HTTPException — { "detail": "..." }
+        detail = decoded['detail'].toString();
       }
     } catch (_) {
       // тело не JSON — оставляем как есть
     }
-    throw ApiException('${resp.statusCode}: $detail');
+    throw ApiException(detail);
   }
 }

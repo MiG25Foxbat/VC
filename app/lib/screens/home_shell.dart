@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import 'feed_screen.dart';
+import 'paste_vacancy_screen.dart';
 import 'queue_screen.dart';
 import 'search_screen.dart';
 
-/// Три постоянные вкладки — поиск, лента, очередь. Карточка с письмом —
-/// не вкладка, а экран, на который переходят по конкретной вакансии.
+/// Четыре постоянные вкладки — поиск, лента, вставка текста, очередь.
+/// Карточка с письмом — не вкладка, а экран, на который переходят по
+/// конкретной вакансии.
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -23,6 +25,7 @@ class _HomeShellState extends State<HomeShell> {
     final screens = [
       SearchScreen(onSearched: _goToFeed),
       const FeedScreen(),
+      const PasteVacancyScreen(),
       const QueueScreen(),
     ];
     return Scaffold(
@@ -33,6 +36,7 @@ class _HomeShellState extends State<HomeShell> {
         destinations: const [
           NavigationDestination(icon: Icon(Icons.search), label: 'Поиск'),
           NavigationDestination(icon: Icon(Icons.list_alt), label: 'Лента'),
+          NavigationDestination(icon: Icon(Icons.paste), label: 'Вставить'),
           NavigationDestination(icon: Icon(Icons.outbox), label: 'Очередь'),
         ],
       ),

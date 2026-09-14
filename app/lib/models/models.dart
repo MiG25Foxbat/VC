@@ -262,6 +262,38 @@ abstract class PrepareRequestBody with _$PrepareRequestBody {
       _$PrepareRequestBodyFromJson(json);
 }
 
+@freezed
+abstract class ExtractRequestBody with _$ExtractRequestBody {
+  const factory ExtractRequestBody({
+    @JsonKey(name: 'raw_text') required String rawText,
+  }) = _ExtractRequestBody;
+
+  factory ExtractRequestBody.fromJson(Map<String, dynamic> json) =>
+      _$ExtractRequestBodyFromJson(json);
+}
+
+/// Результат /extract — то же самое, что отдаёт /search по форме полей,
+/// чтобы можно было передать прямо в /prepare без переименований.
+@freezed
+abstract class ExtractedVacancy with _$ExtractedVacancy {
+  const factory ExtractedVacancy({
+    String? title,
+    @JsonKey(name: 'salary_from') int? salaryFrom,
+    @JsonKey(name: 'salary_to') int? salaryTo,
+    String? currency,
+    String? employment,
+    bool? remote,
+    String? location,
+    @JsonKey(name: 'company_name') String? companyName,
+    @Default(<String>[]) List<String> duties,
+    @Default(<String>[]) List<String> requirements,
+    @Default(<String>[]) List<String> conditions,
+  }) = _ExtractedVacancy;
+
+  factory ExtractedVacancy.fromJson(Map<String, dynamic> json) =>
+      _$ExtractedVacancyFromJson(json);
+}
+
 /// Статус карточки в очереди отправки. Хранится только на клиенте —
 /// сервер про "отправлено"/"отказ" не знает, только про истечение TTL.
 enum QueueStatus { ready, sent, declined }

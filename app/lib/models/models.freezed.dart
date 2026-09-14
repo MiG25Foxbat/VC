@@ -5229,6 +5229,580 @@ as String?,
 
 
 /// @nodoc
+mixin _$ExtractRequestBody {
+
+@JsonKey(name: 'raw_text') String get rawText;
+/// Create a copy of ExtractRequestBody
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ExtractRequestBodyCopyWith<ExtractRequestBody> get copyWith => _$ExtractRequestBodyCopyWithImpl<ExtractRequestBody>(this as ExtractRequestBody, _$identity);
+
+  /// Serializes this ExtractRequestBody to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExtractRequestBody&&(identical(other.rawText, rawText) || other.rawText == rawText));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,rawText);
+
+@override
+String toString() {
+  return 'ExtractRequestBody(rawText: $rawText)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ExtractRequestBodyCopyWith<$Res>  {
+  factory $ExtractRequestBodyCopyWith(ExtractRequestBody value, $Res Function(ExtractRequestBody) _then) = _$ExtractRequestBodyCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'raw_text') String rawText
+});
+
+
+
+
+}
+/// @nodoc
+class _$ExtractRequestBodyCopyWithImpl<$Res>
+    implements $ExtractRequestBodyCopyWith<$Res> {
+  _$ExtractRequestBodyCopyWithImpl(this._self, this._then);
+
+  final ExtractRequestBody _self;
+  final $Res Function(ExtractRequestBody) _then;
+
+/// Create a copy of ExtractRequestBody
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? rawText = null,}) {
+  return _then(_self.copyWith(
+rawText: null == rawText ? _self.rawText : rawText // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ExtractRequestBody].
+extension ExtractRequestBodyPatterns on ExtractRequestBody {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ExtractRequestBody value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ExtractRequestBody() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ExtractRequestBody value)  $default,){
+final _that = this;
+switch (_that) {
+case _ExtractRequestBody():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ExtractRequestBody value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ExtractRequestBody() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'raw_text')  String rawText)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ExtractRequestBody() when $default != null:
+return $default(_that.rawText);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'raw_text')  String rawText)  $default,) {final _that = this;
+switch (_that) {
+case _ExtractRequestBody():
+return $default(_that.rawText);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'raw_text')  String rawText)?  $default,) {final _that = this;
+switch (_that) {
+case _ExtractRequestBody() when $default != null:
+return $default(_that.rawText);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ExtractRequestBody implements ExtractRequestBody {
+  const _ExtractRequestBody({@JsonKey(name: 'raw_text') required this.rawText});
+  factory _ExtractRequestBody.fromJson(Map<String, dynamic> json) => _$ExtractRequestBodyFromJson(json);
+
+@override@JsonKey(name: 'raw_text') final  String rawText;
+
+/// Create a copy of ExtractRequestBody
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ExtractRequestBodyCopyWith<_ExtractRequestBody> get copyWith => __$ExtractRequestBodyCopyWithImpl<_ExtractRequestBody>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ExtractRequestBodyToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ExtractRequestBody&&(identical(other.rawText, rawText) || other.rawText == rawText));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,rawText);
+
+@override
+String toString() {
+  return 'ExtractRequestBody(rawText: $rawText)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ExtractRequestBodyCopyWith<$Res> implements $ExtractRequestBodyCopyWith<$Res> {
+  factory _$ExtractRequestBodyCopyWith(_ExtractRequestBody value, $Res Function(_ExtractRequestBody) _then) = __$ExtractRequestBodyCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'raw_text') String rawText
+});
+
+
+
+
+}
+/// @nodoc
+class __$ExtractRequestBodyCopyWithImpl<$Res>
+    implements _$ExtractRequestBodyCopyWith<$Res> {
+  __$ExtractRequestBodyCopyWithImpl(this._self, this._then);
+
+  final _ExtractRequestBody _self;
+  final $Res Function(_ExtractRequestBody) _then;
+
+/// Create a copy of ExtractRequestBody
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? rawText = null,}) {
+  return _then(_ExtractRequestBody(
+rawText: null == rawText ? _self.rawText : rawText // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$ExtractedVacancy {
+
+ String? get title;@JsonKey(name: 'salary_from') int? get salaryFrom;@JsonKey(name: 'salary_to') int? get salaryTo; String? get currency; String? get employment; bool? get remote; String? get location;@JsonKey(name: 'company_name') String? get companyName; List<String> get duties; List<String> get requirements; List<String> get conditions;
+/// Create a copy of ExtractedVacancy
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ExtractedVacancyCopyWith<ExtractedVacancy> get copyWith => _$ExtractedVacancyCopyWithImpl<ExtractedVacancy>(this as ExtractedVacancy, _$identity);
+
+  /// Serializes this ExtractedVacancy to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExtractedVacancy&&(identical(other.title, title) || other.title == title)&&(identical(other.salaryFrom, salaryFrom) || other.salaryFrom == salaryFrom)&&(identical(other.salaryTo, salaryTo) || other.salaryTo == salaryTo)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.employment, employment) || other.employment == employment)&&(identical(other.remote, remote) || other.remote == remote)&&(identical(other.location, location) || other.location == location)&&(identical(other.companyName, companyName) || other.companyName == companyName)&&const DeepCollectionEquality().equals(other.duties, duties)&&const DeepCollectionEquality().equals(other.requirements, requirements)&&const DeepCollectionEquality().equals(other.conditions, conditions));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,title,salaryFrom,salaryTo,currency,employment,remote,location,companyName,const DeepCollectionEquality().hash(duties),const DeepCollectionEquality().hash(requirements),const DeepCollectionEquality().hash(conditions));
+
+@override
+String toString() {
+  return 'ExtractedVacancy(title: $title, salaryFrom: $salaryFrom, salaryTo: $salaryTo, currency: $currency, employment: $employment, remote: $remote, location: $location, companyName: $companyName, duties: $duties, requirements: $requirements, conditions: $conditions)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ExtractedVacancyCopyWith<$Res>  {
+  factory $ExtractedVacancyCopyWith(ExtractedVacancy value, $Res Function(ExtractedVacancy) _then) = _$ExtractedVacancyCopyWithImpl;
+@useResult
+$Res call({
+ String? title,@JsonKey(name: 'salary_from') int? salaryFrom,@JsonKey(name: 'salary_to') int? salaryTo, String? currency, String? employment, bool? remote, String? location,@JsonKey(name: 'company_name') String? companyName, List<String> duties, List<String> requirements, List<String> conditions
+});
+
+
+
+
+}
+/// @nodoc
+class _$ExtractedVacancyCopyWithImpl<$Res>
+    implements $ExtractedVacancyCopyWith<$Res> {
+  _$ExtractedVacancyCopyWithImpl(this._self, this._then);
+
+  final ExtractedVacancy _self;
+  final $Res Function(ExtractedVacancy) _then;
+
+/// Create a copy of ExtractedVacancy
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? title = freezed,Object? salaryFrom = freezed,Object? salaryTo = freezed,Object? currency = freezed,Object? employment = freezed,Object? remote = freezed,Object? location = freezed,Object? companyName = freezed,Object? duties = null,Object? requirements = null,Object? conditions = null,}) {
+  return _then(_self.copyWith(
+title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String?,salaryFrom: freezed == salaryFrom ? _self.salaryFrom : salaryFrom // ignore: cast_nullable_to_non_nullable
+as int?,salaryTo: freezed == salaryTo ? _self.salaryTo : salaryTo // ignore: cast_nullable_to_non_nullable
+as int?,currency: freezed == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
+as String?,employment: freezed == employment ? _self.employment : employment // ignore: cast_nullable_to_non_nullable
+as String?,remote: freezed == remote ? _self.remote : remote // ignore: cast_nullable_to_non_nullable
+as bool?,location: freezed == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
+as String?,companyName: freezed == companyName ? _self.companyName : companyName // ignore: cast_nullable_to_non_nullable
+as String?,duties: null == duties ? _self.duties : duties // ignore: cast_nullable_to_non_nullable
+as List<String>,requirements: null == requirements ? _self.requirements : requirements // ignore: cast_nullable_to_non_nullable
+as List<String>,conditions: null == conditions ? _self.conditions : conditions // ignore: cast_nullable_to_non_nullable
+as List<String>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ExtractedVacancy].
+extension ExtractedVacancyPatterns on ExtractedVacancy {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ExtractedVacancy value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ExtractedVacancy() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ExtractedVacancy value)  $default,){
+final _that = this;
+switch (_that) {
+case _ExtractedVacancy():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ExtractedVacancy value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ExtractedVacancy() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? title, @JsonKey(name: 'salary_from')  int? salaryFrom, @JsonKey(name: 'salary_to')  int? salaryTo,  String? currency,  String? employment,  bool? remote,  String? location, @JsonKey(name: 'company_name')  String? companyName,  List<String> duties,  List<String> requirements,  List<String> conditions)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ExtractedVacancy() when $default != null:
+return $default(_that.title,_that.salaryFrom,_that.salaryTo,_that.currency,_that.employment,_that.remote,_that.location,_that.companyName,_that.duties,_that.requirements,_that.conditions);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? title, @JsonKey(name: 'salary_from')  int? salaryFrom, @JsonKey(name: 'salary_to')  int? salaryTo,  String? currency,  String? employment,  bool? remote,  String? location, @JsonKey(name: 'company_name')  String? companyName,  List<String> duties,  List<String> requirements,  List<String> conditions)  $default,) {final _that = this;
+switch (_that) {
+case _ExtractedVacancy():
+return $default(_that.title,_that.salaryFrom,_that.salaryTo,_that.currency,_that.employment,_that.remote,_that.location,_that.companyName,_that.duties,_that.requirements,_that.conditions);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? title, @JsonKey(name: 'salary_from')  int? salaryFrom, @JsonKey(name: 'salary_to')  int? salaryTo,  String? currency,  String? employment,  bool? remote,  String? location, @JsonKey(name: 'company_name')  String? companyName,  List<String> duties,  List<String> requirements,  List<String> conditions)?  $default,) {final _that = this;
+switch (_that) {
+case _ExtractedVacancy() when $default != null:
+return $default(_that.title,_that.salaryFrom,_that.salaryTo,_that.currency,_that.employment,_that.remote,_that.location,_that.companyName,_that.duties,_that.requirements,_that.conditions);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ExtractedVacancy implements ExtractedVacancy {
+  const _ExtractedVacancy({this.title, @JsonKey(name: 'salary_from') this.salaryFrom, @JsonKey(name: 'salary_to') this.salaryTo, this.currency, this.employment, this.remote, this.location, @JsonKey(name: 'company_name') this.companyName, final  List<String> duties = const <String>[], final  List<String> requirements = const <String>[], final  List<String> conditions = const <String>[]}): _duties = duties,_requirements = requirements,_conditions = conditions;
+  factory _ExtractedVacancy.fromJson(Map<String, dynamic> json) => _$ExtractedVacancyFromJson(json);
+
+@override final  String? title;
+@override@JsonKey(name: 'salary_from') final  int? salaryFrom;
+@override@JsonKey(name: 'salary_to') final  int? salaryTo;
+@override final  String? currency;
+@override final  String? employment;
+@override final  bool? remote;
+@override final  String? location;
+@override@JsonKey(name: 'company_name') final  String? companyName;
+ final  List<String> _duties;
+@override@JsonKey() List<String> get duties {
+  if (_duties is EqualUnmodifiableListView) return _duties;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_duties);
+}
+
+ final  List<String> _requirements;
+@override@JsonKey() List<String> get requirements {
+  if (_requirements is EqualUnmodifiableListView) return _requirements;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_requirements);
+}
+
+ final  List<String> _conditions;
+@override@JsonKey() List<String> get conditions {
+  if (_conditions is EqualUnmodifiableListView) return _conditions;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_conditions);
+}
+
+
+/// Create a copy of ExtractedVacancy
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ExtractedVacancyCopyWith<_ExtractedVacancy> get copyWith => __$ExtractedVacancyCopyWithImpl<_ExtractedVacancy>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ExtractedVacancyToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ExtractedVacancy&&(identical(other.title, title) || other.title == title)&&(identical(other.salaryFrom, salaryFrom) || other.salaryFrom == salaryFrom)&&(identical(other.salaryTo, salaryTo) || other.salaryTo == salaryTo)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.employment, employment) || other.employment == employment)&&(identical(other.remote, remote) || other.remote == remote)&&(identical(other.location, location) || other.location == location)&&(identical(other.companyName, companyName) || other.companyName == companyName)&&const DeepCollectionEquality().equals(other._duties, _duties)&&const DeepCollectionEquality().equals(other._requirements, _requirements)&&const DeepCollectionEquality().equals(other._conditions, _conditions));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,title,salaryFrom,salaryTo,currency,employment,remote,location,companyName,const DeepCollectionEquality().hash(_duties),const DeepCollectionEquality().hash(_requirements),const DeepCollectionEquality().hash(_conditions));
+
+@override
+String toString() {
+  return 'ExtractedVacancy(title: $title, salaryFrom: $salaryFrom, salaryTo: $salaryTo, currency: $currency, employment: $employment, remote: $remote, location: $location, companyName: $companyName, duties: $duties, requirements: $requirements, conditions: $conditions)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ExtractedVacancyCopyWith<$Res> implements $ExtractedVacancyCopyWith<$Res> {
+  factory _$ExtractedVacancyCopyWith(_ExtractedVacancy value, $Res Function(_ExtractedVacancy) _then) = __$ExtractedVacancyCopyWithImpl;
+@override @useResult
+$Res call({
+ String? title,@JsonKey(name: 'salary_from') int? salaryFrom,@JsonKey(name: 'salary_to') int? salaryTo, String? currency, String? employment, bool? remote, String? location,@JsonKey(name: 'company_name') String? companyName, List<String> duties, List<String> requirements, List<String> conditions
+});
+
+
+
+
+}
+/// @nodoc
+class __$ExtractedVacancyCopyWithImpl<$Res>
+    implements _$ExtractedVacancyCopyWith<$Res> {
+  __$ExtractedVacancyCopyWithImpl(this._self, this._then);
+
+  final _ExtractedVacancy _self;
+  final $Res Function(_ExtractedVacancy) _then;
+
+/// Create a copy of ExtractedVacancy
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? title = freezed,Object? salaryFrom = freezed,Object? salaryTo = freezed,Object? currency = freezed,Object? employment = freezed,Object? remote = freezed,Object? location = freezed,Object? companyName = freezed,Object? duties = null,Object? requirements = null,Object? conditions = null,}) {
+  return _then(_ExtractedVacancy(
+title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String?,salaryFrom: freezed == salaryFrom ? _self.salaryFrom : salaryFrom // ignore: cast_nullable_to_non_nullable
+as int?,salaryTo: freezed == salaryTo ? _self.salaryTo : salaryTo // ignore: cast_nullable_to_non_nullable
+as int?,currency: freezed == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
+as String?,employment: freezed == employment ? _self.employment : employment // ignore: cast_nullable_to_non_nullable
+as String?,remote: freezed == remote ? _self.remote : remote // ignore: cast_nullable_to_non_nullable
+as bool?,location: freezed == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
+as String?,companyName: freezed == companyName ? _self.companyName : companyName // ignore: cast_nullable_to_non_nullable
+as String?,duties: null == duties ? _self._duties : duties // ignore: cast_nullable_to_non_nullable
+as List<String>,requirements: null == requirements ? _self._requirements : requirements // ignore: cast_nullable_to_non_nullable
+as List<String>,conditions: null == conditions ? _self._conditions : conditions // ignore: cast_nullable_to_non_nullable
+as List<String>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$QueueRecord {
 
  SearchResultItem get vacancy; ResultCard get card; QueueStatus get status; String get preparedAt;
