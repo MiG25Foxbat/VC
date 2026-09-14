@@ -7,7 +7,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -93,6 +93,27 @@ class ForgetRequest(BaseModel):
     cache_key: str
 
 
+class ExtractRequest(BaseModel):
+    """Вакансия, найденная где-то в сети и вставленная вручную —
+    L3 каскада источников из раздела 4 docs/BUILD.md."""
+
+    raw_text: str
+
+
+class ExtractResponse(BaseModel):
+    title: str | None = None
+    salary_from: int | None = None
+    salary_to: int | None = None
+    currency: str | None = None
+    employment: str | None = None
+    remote: bool | None = None
+    location: str | None = None
+    company_name: str | None = None
+    duties: list[str] = []
+    requirements: list[str] = []
+    conditions: list[str] = []
+
+
 # ---- эндпоинты ---------------------------------------------------------
 
 @app.get("/health")
@@ -155,6 +176,36 @@ async def search(req: SearchRequest) -> SearchResponse:
         for v in items
     ]
     return SearchResponse(items=response_items, errors=errors)
+
+
+@app.post("/extract", response_model=ExtractResponse)
+async def extract(req: ExtractRequest) -> ExtractResponse:
+    """Разбирает вставленный вручную текст вакансии в структуру, которую
+    можно тут же отдать в /prepare — тот же контракт полей, что и у
+    вакансии из /search (title, company_name, salary_from...)."""
+    if not req.raw_text.strip():
+        raise HTTPException(status_code=400, detail="Пустой текст вакансии")
+    if not settings.llm_api_key:
+        raise HTTPException(status_code=400, detail="LLM_API_KEY не задан — разбор текста недоступен")
+
+    try:
+        raw = await generate.extract_vacancy(req.raw_text, settings=settings)
+    except Exception as exc:  # модель могла вернуть не-JSON или упасть по сети
+        raise HTTPException(status_code=502, detail=f"Не удалось разобрать текст: {exc}") from exc
+
+    return ExtractResponse(
+        title=raw.get("title"),
+        salary_from=raw.get("salary_from"),
+        salary_to=raw.get("salary_to"),
+        currency=raw.get("currency"),
+        employment=raw.get("employment"),
+        remote=raw.get("remote"),
+        location=raw.get("location"),
+        company_name=raw.get("company_name"),
+        duties=raw.get("duties") or [],
+        requirements=raw.get("requirements") or [],
+        conditions=raw.get("conditions") or [],
+    )
 
 
 @app.post("/prepare", response_model=ResultCard)

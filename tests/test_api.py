@@ -119,6 +119,77 @@ def test_search_superjob_failure_does_not_break_trudvsem_results():
     assert data["errors"] == [{"source": "superjob", "reason": "SUPERJOB_APP_ID не задан"}]
 
 
+def test_extract_returns_structured_vacancy():
+    import dataclasses
+
+    import server.api.main as main_module
+
+    async def fake_extract_vacancy(raw_text, *, settings):
+        assert "Ищем бизнес-ассистента" in raw_text
+        return {
+            "title": "Бизнес-ассистент",
+            "salary_from": 100000,
+            "salary_to": None,
+            "currency": "RUB",
+            "employment": "полная занятость",
+            "remote": True,
+            "location": "Москва",
+            "company_name": "ООО Ромашка",
+            "duties": ["Вести календарь"],
+            "requirements": ["Опыт от года"],
+            "conditions": ["Удалённо"],
+        }
+
+    fake_settings = dataclasses.replace(main_module.settings, llm_api_key="fake-key")
+    with (
+        patch.object(main_module, "settings", new=fake_settings),
+        patch("server.api.main.generate.extract_vacancy", new=fake_extract_vacancy),
+    ):
+        resp = client.post("/extract", json={"raw_text": "Ищем бизнес-ассистента в ООО Ромашка"})
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["title"] == "Бизнес-ассистент"
+    assert data["company_name"] == "ООО Ромашка"
+    assert data["duties"] == ["Вести календарь"]
+
+
+def test_extract_without_llm_key_returns_bad_request():
+    resp = client.post("/extract", json={"raw_text": "Ищем бизнес-ассистента"})
+    assert resp.status_code == 400
+
+
+def test_extract_rejects_empty_text():
+    import dataclasses
+
+    import server.api.main as main_module
+
+    fake_settings = dataclasses.replace(main_module.settings, llm_api_key="fake-key")
+    with patch.object(main_module, "settings", new=fake_settings):
+        resp = client.post("/extract", json={"raw_text": "   "})
+
+    assert resp.status_code == 400
+
+
+def test_extract_model_failure_returns_502_not_empty_response():
+    import dataclasses
+
+    import server.api.main as main_module
+    from server.llm.client import LLMError
+
+    async def boom(raw_text, *, settings):
+        raise LLMError("модель не вернула JSON")
+
+    fake_settings = dataclasses.replace(main_module.settings, llm_api_key="fake-key")
+    with (
+        patch.object(main_module, "settings", new=fake_settings),
+        patch("server.api.main.generate.extract_vacancy", new=boom),
+    ):
+        resp = client.post("/extract", json={"raw_text": "Ищем бизнес-ассистента"})
+
+    assert resp.status_code == 502
+
+
 def test_prepare_uses_profile_text_from_request_over_server_file():
     # Бэкенд без состояния и на Render server/profiles/default.yaml просто
     # нет — это личные данные, в git не коммитятся. Клиент обязан прислать
