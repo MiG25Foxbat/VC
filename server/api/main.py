@@ -16,7 +16,7 @@ from server.cache import TTLCache
 from server.config import load_settings
 from server.enrich.company import enrich_company
 from server.llm import generate
-from server.models import Confidence, Meta, ResultCard, Vacancy
+from server.models import Company, Confidence, Letter, Meta, Owner, ResultCard, Vacancy
 from server.sources import superjob, trudvsem
 from server.sources.base import SourceUnavailable
 
@@ -244,6 +244,15 @@ async def prepare(req: PrepareRequest) -> ResultCard | JSONResponse:
             letter = await generate.write_letter(
                 profile_text, vacancy.model_dump_json(), dossier_block, settings=settings
             )
+            if letter.text and not _has_addressable_name(company, owner):
+                # write_letter.md требует пустой текст, если в справке нет
+                # имени — но модель это правило иногда всё же нарушает
+                # (поймано вживую: тот же owner=None дважды подряд дал то
+                # пустое письмо, то письмо на вымышленное имя). Раз в
+                # справке точно неоткуда взять имя, подстраховываемся кодом,
+                # а не только промптом.
+                log.warning("письмо адресовано кому-то, хотя имени в справке нет — обнуляю")
+                letter = Letter(text="", facts=[])
             brief = await generate.write_brief(vacancy.model_dump_json(), dossier_block, settings=settings)
         except Exception as exc:  # ошибка модели не должна ронять карточку целиком
             log.warning("модель не отработала: %s", exc)
@@ -282,6 +291,19 @@ def _load_profile(profile_id: str) -> str:
         log.warning("профиль %s не найден по пути %s", profile_id, path)
         return ""
     return path.read_text(encoding="utf-8")
+
+
+def _has_addressable_name(company: Company | None, owner: Owner | None) -> bool:
+    """Есть ли в справке настоящее имя, к которому можно обратиться в
+    письме: либо найденный руководитель, либо ИП, чьё имя и есть
+    название компании ("ИП Сергиенко Андрей Викторович")."""
+    if owner and owner.full_name:
+        return True
+    if company and company.legal_name:
+        name = company.legal_name.upper()
+        if name.startswith("ИП ") or "ИНДИВИДУАЛЬНЫЙ ПРЕДПРИНИМАТЕЛЬ" in name:
+            return True
+    return False
 
 
 def _build_dossier_block(vacancy: Vacancy, company, owner) -> str:

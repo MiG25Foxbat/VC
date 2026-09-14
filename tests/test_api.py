@@ -190,6 +190,98 @@ def test_extract_model_failure_returns_502_not_empty_response():
     assert resp.status_code == 502
 
 
+def test_prepare_blanks_letter_that_addresses_a_name_not_in_the_dossier():
+    # Поймано вживую: одна и та же справка (owner=None, компания —
+    # обычное АО, не ИП) дважды подряд дала модели письмо то пустым (как
+    # требует write_letter.md), то адресованным вымышленному "Алексею".
+    # Раз в справке точно неоткуда взять имя, сервер обязан подстраховать
+    # промпт кодом, а не полагаться, что модель сама всегда соблюдает
+    # правило "нет имени — пустой текст".
+    import dataclasses
+
+    import server.api.main as main_module
+    from server.models import Brief, Company, Letter, LetterFact
+
+    async def fake_enrich_company(*, company_name, company_inn, dadata_token):
+        company = Company(legal_name='АО "ЯНДЕКС БАНК"', inn="7750004168", status="ACTIVE")
+        return company, None, 0.9, 0.0  # owner=None, как в реальном ответе DaData
+
+    async def fake_write_letter(profile, vacancy, dossier, *, settings):
+        # модель нарушает собственную инструкцию и всё равно пишет письмо
+        return Letter(
+            text="Алексей, добрый день...",
+            facts=[LetterFact(claim="выдуманное утверждение", source_url="https://example.test")],
+        )
+
+    async def fake_write_brief(vacancy, dossier, *, settings):
+        return Brief()
+
+    fake_settings = dataclasses.replace(main_module.settings, llm_api_key="fake-key")
+    with (
+        patch.object(main_module, "settings", new=fake_settings),
+        patch("server.api.main.enrich_company", new=fake_enrich_company),
+        patch("server.api.main.generate.write_letter", new=fake_write_letter),
+        patch("server.api.main.generate.write_brief", new=fake_write_brief),
+    ):
+        payload = {
+            "vacancy_id": "no-owner-1",
+            "source": "manual",
+            "title": "Персональный ассистент",
+            "url": "",
+            "company_name": "Яндекс",
+        }
+        resp = client.post("/prepare", json=payload)
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["owner"] is None
+    assert data["letter"]["text"] == ""
+    assert data["letter"]["facts"] == []
+
+
+def test_prepare_keeps_letter_addressed_to_sole_proprietor_named_in_company_legal_name():
+    # Контрольный случай на ту же защиту: у ИП нет отдельного owner, имя
+    # руководителя — это и есть company.legal_name. Гвард не должен
+    # затирать законное письмо в этом случае.
+    import dataclasses
+
+    import server.api.main as main_module
+    from server.models import Brief, Company, Letter, LetterFact
+
+    async def fake_enrich_company(*, company_name, company_inn, dadata_token):
+        company = Company(legal_name="ИП Сергиенко Андрей Викторович", inn="260905850343", status="ACTIVE")
+        return company, None, 0.9, 0.0
+
+    async def fake_write_letter(profile, vacancy, dossier, *, settings):
+        return Letter(
+            text="Андрей, добрый день...",
+            facts=[LetterFact(claim="факт", source_url="https://example.test")],
+        )
+
+    async def fake_write_brief(vacancy, dossier, *, settings):
+        return Brief()
+
+    fake_settings = dataclasses.replace(main_module.settings, llm_api_key="fake-key")
+    with (
+        patch.object(main_module, "settings", new=fake_settings),
+        patch("server.api.main.enrich_company", new=fake_enrich_company),
+        patch("server.api.main.generate.write_letter", new=fake_write_letter),
+        patch("server.api.main.generate.write_brief", new=fake_write_brief),
+    ):
+        payload = {
+            "vacancy_id": "sole-proprietor-1",
+            "source": "trudvsem",
+            "title": "Системный администратор",
+            "url": "https://trudvsem.ru/x",
+            "company_name": "ИП Сергиенко А. В.",
+        }
+        resp = client.post("/prepare", json=payload)
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["letter"]["text"] == "Андрей, добрый день..."
+
+
 def test_prepare_uses_profile_text_from_request_over_server_file():
     # Бэкенд без состояния и на Render server/profiles/default.yaml просто
     # нет — это личные данные, в git не коммитятся. Клиент обязан прислать
