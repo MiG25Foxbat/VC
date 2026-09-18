@@ -69,7 +69,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           children: [
             TextField(
               controller: _queryController,
-              decoration: const InputDecoration(labelText: 'Что ищем', hintText: 'бизнес-ассистент'),
+              decoration: const InputDecoration(
+                labelText: 'Что ищем',
+                hintText: 'бизнес-ассистент, офис-менеджер',
+              ),
               onSubmitted: (_) => _submit(),
             ),
             const SizedBox(height: 12),

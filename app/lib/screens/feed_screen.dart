@@ -5,14 +5,45 @@ import '../state/search_state.dart';
 import '../widgets/vacancy_tile.dart';
 import 'card_screen.dart';
 
-class FeedScreen extends ConsumerWidget {
+class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FeedScreen> createState() => _FeedScreenState();
+}
+
+class _FeedScreenState extends ConsumerState<FeedScreen> {
+  final _filterController = TextEditingController();
+
+  @override
+  void dispose() {
+    _filterController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(searchProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Лента')),
+      appBar: AppBar(
+        title: const Text('Лента'),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(52),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            child: TextField(
+              controller: _filterController,
+              onChanged: (_) => setState(() {}),
+              decoration: const InputDecoration(
+                isDense: true,
+                prefixIcon: Icon(Icons.search),
+                hintText: 'Фильтр по названию или компании',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+        ),
+      ),
       body: _buildBody(context, state),
     );
   }
@@ -24,7 +55,15 @@ class FeedScreen extends ConsumerWidget {
     if (state.error != null) {
       return Center(child: Text(state.error!));
     }
-    final items = state.result?.items ?? const [];
+    var items = state.result?.items ?? const [];
+    final filter = _filterController.text.trim().toLowerCase();
+    if (filter.isNotEmpty) {
+      items = items
+          .where((i) =>
+              i.title.toLowerCase().contains(filter) ||
+              (i.companyName ?? '').toLowerCase().contains(filter))
+          .toList();
+    }
     if (items.isEmpty) {
       return const Center(child: Text('Пока пусто — начни с поиска'));
     }

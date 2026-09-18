@@ -32,10 +32,18 @@ class SearchNotifier extends Notifier<SearchState> {
   @override
   SearchState build() => const SearchState();
 
+  /// query.query может быть списком через запятую — один вызов на термин,
+  /// результаты и ошибки склеиваются в один SearchResult.
   Future<void> runSearch(SearchRequestBody query) async {
     state = state.copyWith(loading: true, clearError: true, lastQuery: query);
+    final terms = query.query.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty);
     try {
-      final result = await ref.read(apiClientProvider).search(query);
+      final client = ref.read(apiClientProvider);
+      final results = await Future.wait(terms.map((t) => client.search(query.copyWith(query: t))));
+      final result = SearchResult(
+        items: [for (final r in results) ...r.items],
+        errors: [for (final r in results) ...r.errors],
+      );
       state = state.copyWith(loading: false, result: result, clearError: true);
     } on ApiException catch (e) {
       state = state.copyWith(loading: false, error: e.message);

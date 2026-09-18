@@ -33,28 +33,33 @@ class QueueScreen extends ConsumerWidget {
               child: Text('Пусто — подготовленные карточки появятся здесь автоматически'),
             );
           }
-          return ListView.separated(
-            itemCount: records.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final record = records[index];
-              return VacancyTile(
-                item: record.vacancy,
-                trailing: _StatusChip(status: record.status),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => CardScreen(vacancy: record.vacancy, initialRecord: record),
-                    ),
-                  );
-                },
-              );
-            },
+          final notSent = records.where((r) => r.status != QueueStatus.sent).toList();
+          final sent = records.where((r) => r.status == QueueStatus.sent).toList();
+          return ListView(
+            children: [
+              if (notSent.isNotEmpty) _sectionHeader(context, 'Не отправлено'),
+              for (final r in notSent) _tile(context, r),
+              if (sent.isNotEmpty) _sectionHeader(context, 'Отправлено'),
+              for (final r in sent) _tile(context, r),
+            ],
           );
         },
       ),
     );
   }
+
+  Widget _sectionHeader(BuildContext context, String title) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+        child: Text(title, style: Theme.of(context).textTheme.titleSmall),
+      );
+
+  Widget _tile(BuildContext context, QueueRecord record) => VacancyTile(
+        item: record.vacancy,
+        trailing: _StatusChip(status: record.status),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => CardScreen(vacancy: record.vacancy, initialRecord: record)),
+        ),
+      );
 }
 
 class _StatusChip extends StatelessWidget {
