@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import phonenumbers
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -16,7 +18,7 @@ from server.cache import TTLCache
 from server.config import load_settings
 from server.enrich.company import enrich_company
 from server.llm import generate
-from server.models import Company, Confidence, Letter, Meta, Owner, ResultCard, Vacancy
+from server.models import Company, ContactCandidate, Confidence, Letter, Meta, Owner, ResultCard, Vacancy
 from server.sources import superjob, trudvsem
 from server.sources.base import SourceUnavailable
 
@@ -244,20 +246,25 @@ async def prepare(req: PrepareRequest) -> ResultCard | JSONResponse:
             letter = await generate.write_letter(
                 profile_text, vacancy.model_dump_json(), dossier_block, settings=settings
             )
-            if letter.text and not _has_addressable_name(company, owner):
+            if (letter.text or letter.platform or letter.message) and not _has_addressable_name(
+                company, owner
+            ):
                 # write_letter.md требует пустой текст, если в справке нет
                 # имени — но модель это правило иногда всё же нарушает
                 # (поймано вживую: тот же owner=None дважды подряд дал то
                 # пустое письмо, то письмо на вымышленное имя). Раз в
                 # справке точно неоткуда взять имя, подстраховываемся кодом,
-                # а не только промптом.
+                # а не только промптом. Все три формата, не только text —
+                # им точно так же не к кому обращаться.
                 log.warning("письмо адресовано кому-то, хотя имени в справке нет — обнуляю")
-                letter = Letter(text="", facts=[])
+                letter = Letter(text="", platform="", message="", facts=[])
             brief = await generate.write_brief(vacancy.model_dump_json(), dossier_block, settings=settings)
         except Exception as exc:  # ошибка модели не должна ронять карточку целиком
             log.warning("модель не отработала: %s", exc)
     else:
         log.info("LLM_API_KEY не задан — письмо и разбор пропущены")
+
+    contacts = _resolve_contacts(vacancy, owner)
 
     expires_at = datetime.now(timezone.utc) + timedelta(seconds=settings.cache_ttl_seconds)
     card = ResultCard(
@@ -267,6 +274,7 @@ async def prepare(req: PrepareRequest) -> ResultCard | JSONResponse:
         reviews=[],
         letter=letter,
         brief=brief,
+        contacts=contacts,
         meta=Meta(
             confidence=Confidence(company=conf_company, owner=conf_owner, reviews=0.0),
             cache_key=cache_key,
@@ -304,6 +312,105 @@ def _has_addressable_name(company: Company | None, owner: Owner | None) -> bool:
         if name.startswith("ИП ") or "ИНДИВИДУАЛЬНЫЙ ПРЕДПРИНИМАТЕЛЬ" in name:
             return True
     return False
+
+
+_EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+\.[a-zA-Zа-яА-Я]{2,}")
+# "@handle" — но не хвост email (перед @ не должно быть буквы/точки/дефиса),
+# и отдельно ссылка вида t.me/handle.
+_TELEGRAM_HANDLE_RE = re.compile(r"(?<![\w.+-])@([A-Za-z0-9_]{4,32})\b")
+_TELEGRAM_LINK_RE = re.compile(r"(?:https?://)?t\.me/([A-Za-z0-9_]{4,32})")
+
+
+def _extract_vacancy_contacts(text: str | None) -> list[ContactCandidate]:
+    """Контакт, написанный прямо в тексте вакансии — самый надёжный
+    источник: это то, что работодатель сам опубликовал, не догадка и не
+    резолвинг по имени компании. confidence="confirmed"."""
+    if not text:
+        return []
+    found: list[ContactCandidate] = []
+    seen: set[str] = set()
+
+    for match in _EMAIL_RE.finditer(text):
+        email = match.group(0)
+        if email.lower() in seen:
+            continue
+        seen.add(email.lower())
+        found.append(
+            ContactCandidate(
+                label="Почта из текста вакансии",
+                value=email,
+                kind="email",
+                source="вакансия",
+                confidence="confirmed",
+            )
+        )
+
+    for match in phonenumbers.PhoneNumberMatcher(text, "RU"):
+        e164 = phonenumbers.format_number(match.number, phonenumbers.PhoneNumberFormat.E164)
+        if e164 in seen:
+            continue
+        seen.add(e164)
+        found.append(
+            ContactCandidate(
+                label="Телефон из текста вакансии",
+                value=e164,
+                kind="phone",
+                source="вакансия",
+                confidence="confirmed",
+            )
+        )
+
+    for pattern in (_TELEGRAM_HANDLE_RE, _TELEGRAM_LINK_RE):
+        for match in pattern.finditer(text):
+            handle = "@" + match.group(1)
+            if handle.lower() in seen:
+                continue
+            seen.add(handle.lower())
+            found.append(
+                ContactCandidate(
+                    label="Telegram из текста вакансии",
+                    value=handle,
+                    kind="telegram",
+                    source="вакансия",
+                    confidence="confirmed",
+                )
+            )
+
+    return found
+
+
+def _resolve_contacts(vacancy: Vacancy, owner: Owner | None) -> list[ContactCandidate]:
+    """Порядок проверки: контакт прямо из вакансии → сама страница
+    вакансии (туда и уходит "platform"-формат письма) → руководитель по
+    ЕГРЮЛ последним и с confidence="verify" — это имя из реестра, не
+    подтверждённый канал связи, до отправки стоит перепроверить, что
+    это тот самый человек, а не просто действующий директор по бумагам."""
+    contacts = _extract_vacancy_contacts(vacancy.description)
+
+    if vacancy.url:
+        contacts.append(
+            ContactCandidate(
+                label="Страница вакансии",
+                value=vacancy.url,
+                kind="url",
+                source="вакансия",
+                confidence="confirmed",
+            )
+        )
+
+    if owner and owner.full_name:
+        contacts.append(
+            ContactCandidate(
+                label=owner.full_name,
+                role=owner.role,
+                value=owner.full_name,
+                kind="name",
+                source=owner.source or "ЕГРЮЛ",
+                confidence="verify",
+            )
+        )
+
+    return contacts
 
 
 def _build_dossier_block(vacancy: Vacancy, company, owner) -> str:

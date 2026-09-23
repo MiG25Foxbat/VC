@@ -2278,7 +2278,7 @@ as String,
 /// @nodoc
 mixin _$Letter {
 
- String get text; List<LetterFact> get facts;
+ String get text; String get platform; String get message; List<LetterFact> get facts;
 /// Create a copy of Letter
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2291,16 +2291,16 @@ $LetterCopyWith<Letter> get copyWith => _$LetterCopyWithImpl<Letter>(this as Let
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Letter&&(identical(other.text, text) || other.text == text)&&const DeepCollectionEquality().equals(other.facts, facts));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Letter&&(identical(other.text, text) || other.text == text)&&(identical(other.platform, platform) || other.platform == platform)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other.facts, facts));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,text,const DeepCollectionEquality().hash(facts));
+int get hashCode => Object.hash(runtimeType,text,platform,message,const DeepCollectionEquality().hash(facts));
 
 @override
 String toString() {
-  return 'Letter(text: $text, facts: $facts)';
+  return 'Letter(text: $text, platform: $platform, message: $message, facts: $facts)';
 }
 
 
@@ -2311,7 +2311,7 @@ abstract mixin class $LetterCopyWith<$Res>  {
   factory $LetterCopyWith(Letter value, $Res Function(Letter) _then) = _$LetterCopyWithImpl;
 @useResult
 $Res call({
- String text, List<LetterFact> facts
+ String text, String platform, String message, List<LetterFact> facts
 });
 
 
@@ -2328,9 +2328,11 @@ class _$LetterCopyWithImpl<$Res>
 
 /// Create a copy of Letter
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? text = null,Object? facts = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? text = null,Object? platform = null,Object? message = null,Object? facts = null,}) {
   return _then(_self.copyWith(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,platform: null == platform ? _self.platform : platform // ignore: cast_nullable_to_non_nullable
+as String,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,facts: null == facts ? _self.facts : facts // ignore: cast_nullable_to_non_nullable
 as List<LetterFact>,
   ));
@@ -2417,10 +2419,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text,  List<LetterFact> facts)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text,  String platform,  String message,  List<LetterFact> facts)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Letter() when $default != null:
-return $default(_that.text,_that.facts);case _:
+return $default(_that.text,_that.platform,_that.message,_that.facts);case _:
   return orElse();
 
 }
@@ -2438,10 +2440,10 @@ return $default(_that.text,_that.facts);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text,  List<LetterFact> facts)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text,  String platform,  String message,  List<LetterFact> facts)  $default,) {final _that = this;
 switch (_that) {
 case _Letter():
-return $default(_that.text,_that.facts);case _:
+return $default(_that.text,_that.platform,_that.message,_that.facts);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2458,10 +2460,10 @@ return $default(_that.text,_that.facts);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text,  List<LetterFact> facts)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text,  String platform,  String message,  List<LetterFact> facts)?  $default,) {final _that = this;
 switch (_that) {
 case _Letter() when $default != null:
-return $default(_that.text,_that.facts);case _:
+return $default(_that.text,_that.platform,_that.message,_that.facts);case _:
   return null;
 
 }
@@ -2473,10 +2475,12 @@ return $default(_that.text,_that.facts);case _:
 @JsonSerializable()
 
 class _Letter implements Letter {
-  const _Letter({required this.text, final  List<LetterFact> facts = const <LetterFact>[]}): _facts = facts;
+  const _Letter({required this.text, this.platform = '', this.message = '', final  List<LetterFact> facts = const <LetterFact>[]}): _facts = facts;
   factory _Letter.fromJson(Map<String, dynamic> json) => _$LetterFromJson(json);
 
 @override final  String text;
+@override@JsonKey() final  String platform;
+@override@JsonKey() final  String message;
  final  List<LetterFact> _facts;
 @override@JsonKey() List<LetterFact> get facts {
   if (_facts is EqualUnmodifiableListView) return _facts;
@@ -2498,16 +2502,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Letter&&(identical(other.text, text) || other.text == text)&&const DeepCollectionEquality().equals(other._facts, _facts));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Letter&&(identical(other.text, text) || other.text == text)&&(identical(other.platform, platform) || other.platform == platform)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other._facts, _facts));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,text,const DeepCollectionEquality().hash(_facts));
+int get hashCode => Object.hash(runtimeType,text,platform,message,const DeepCollectionEquality().hash(_facts));
 
 @override
 String toString() {
-  return 'Letter(text: $text, facts: $facts)';
+  return 'Letter(text: $text, platform: $platform, message: $message, facts: $facts)';
 }
 
 
@@ -2518,7 +2522,7 @@ abstract mixin class _$LetterCopyWith<$Res> implements $LetterCopyWith<$Res> {
   factory _$LetterCopyWith(_Letter value, $Res Function(_Letter) _then) = __$LetterCopyWithImpl;
 @override @useResult
 $Res call({
- String text, List<LetterFact> facts
+ String text, String platform, String message, List<LetterFact> facts
 });
 
 
@@ -2535,11 +2539,291 @@ class __$LetterCopyWithImpl<$Res>
 
 /// Create a copy of Letter
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? facts = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? platform = null,Object? message = null,Object? facts = null,}) {
   return _then(_Letter(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,platform: null == platform ? _self.platform : platform // ignore: cast_nullable_to_non_nullable
+as String,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,facts: null == facts ? _self._facts : facts // ignore: cast_nullable_to_non_nullable
 as List<LetterFact>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$ContactCandidate {
+
+ String get label; String? get role; String get value; String get kind; String get source; String get confidence;
+/// Create a copy of ContactCandidate
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ContactCandidateCopyWith<ContactCandidate> get copyWith => _$ContactCandidateCopyWithImpl<ContactCandidate>(this as ContactCandidate, _$identity);
+
+  /// Serializes this ContactCandidate to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ContactCandidate&&(identical(other.label, label) || other.label == label)&&(identical(other.role, role) || other.role == role)&&(identical(other.value, value) || other.value == value)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.source, source) || other.source == source)&&(identical(other.confidence, confidence) || other.confidence == confidence));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,label,role,value,kind,source,confidence);
+
+@override
+String toString() {
+  return 'ContactCandidate(label: $label, role: $role, value: $value, kind: $kind, source: $source, confidence: $confidence)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ContactCandidateCopyWith<$Res>  {
+  factory $ContactCandidateCopyWith(ContactCandidate value, $Res Function(ContactCandidate) _then) = _$ContactCandidateCopyWithImpl;
+@useResult
+$Res call({
+ String label, String? role, String value, String kind, String source, String confidence
+});
+
+
+
+
+}
+/// @nodoc
+class _$ContactCandidateCopyWithImpl<$Res>
+    implements $ContactCandidateCopyWith<$Res> {
+  _$ContactCandidateCopyWithImpl(this._self, this._then);
+
+  final ContactCandidate _self;
+  final $Res Function(ContactCandidate) _then;
+
+/// Create a copy of ContactCandidate
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? label = null,Object? role = freezed,Object? value = null,Object? kind = null,Object? source = null,Object? confidence = null,}) {
+  return _then(_self.copyWith(
+label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String,role: freezed == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as String?,value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
+as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as String,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
+as String,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ContactCandidate].
+extension ContactCandidatePatterns on ContactCandidate {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ContactCandidate value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ContactCandidate() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ContactCandidate value)  $default,){
+final _that = this;
+switch (_that) {
+case _ContactCandidate():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ContactCandidate value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ContactCandidate() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String label,  String? role,  String value,  String kind,  String source,  String confidence)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ContactCandidate() when $default != null:
+return $default(_that.label,_that.role,_that.value,_that.kind,_that.source,_that.confidence);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String label,  String? role,  String value,  String kind,  String source,  String confidence)  $default,) {final _that = this;
+switch (_that) {
+case _ContactCandidate():
+return $default(_that.label,_that.role,_that.value,_that.kind,_that.source,_that.confidence);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String label,  String? role,  String value,  String kind,  String source,  String confidence)?  $default,) {final _that = this;
+switch (_that) {
+case _ContactCandidate() when $default != null:
+return $default(_that.label,_that.role,_that.value,_that.kind,_that.source,_that.confidence);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ContactCandidate implements ContactCandidate {
+  const _ContactCandidate({required this.label, this.role, required this.value, required this.kind, required this.source, required this.confidence});
+  factory _ContactCandidate.fromJson(Map<String, dynamic> json) => _$ContactCandidateFromJson(json);
+
+@override final  String label;
+@override final  String? role;
+@override final  String value;
+@override final  String kind;
+@override final  String source;
+@override final  String confidence;
+
+/// Create a copy of ContactCandidate
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ContactCandidateCopyWith<_ContactCandidate> get copyWith => __$ContactCandidateCopyWithImpl<_ContactCandidate>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ContactCandidateToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ContactCandidate&&(identical(other.label, label) || other.label == label)&&(identical(other.role, role) || other.role == role)&&(identical(other.value, value) || other.value == value)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.source, source) || other.source == source)&&(identical(other.confidence, confidence) || other.confidence == confidence));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,label,role,value,kind,source,confidence);
+
+@override
+String toString() {
+  return 'ContactCandidate(label: $label, role: $role, value: $value, kind: $kind, source: $source, confidence: $confidence)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ContactCandidateCopyWith<$Res> implements $ContactCandidateCopyWith<$Res> {
+  factory _$ContactCandidateCopyWith(_ContactCandidate value, $Res Function(_ContactCandidate) _then) = __$ContactCandidateCopyWithImpl;
+@override @useResult
+$Res call({
+ String label, String? role, String value, String kind, String source, String confidence
+});
+
+
+
+
+}
+/// @nodoc
+class __$ContactCandidateCopyWithImpl<$Res>
+    implements _$ContactCandidateCopyWith<$Res> {
+  __$ContactCandidateCopyWithImpl(this._self, this._then);
+
+  final _ContactCandidate _self;
+  final $Res Function(_ContactCandidate) _then;
+
+/// Create a copy of ContactCandidate
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? label = null,Object? role = freezed,Object? value = null,Object? kind = null,Object? source = null,Object? confidence = null,}) {
+  return _then(_ContactCandidate(
+label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String,role: freezed == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as String?,value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
+as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as String,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
+as String,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -3390,7 +3674,7 @@ $ConfidenceCopyWith<$Res> get confidence {
 /// @nodoc
 mixin _$ResultCard {
 
- Vacancy get vacancy; Company? get company; Owner? get owner; List<Review> get reviews; Letter? get letter; Brief? get brief; CardMeta get meta;
+ Vacancy get vacancy; Company? get company; Owner? get owner; List<Review> get reviews; Letter? get letter; Brief? get brief; List<ContactCandidate> get contacts; CardMeta get meta;
 /// Create a copy of ResultCard
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3403,16 +3687,16 @@ $ResultCardCopyWith<ResultCard> get copyWith => _$ResultCardCopyWithImpl<ResultC
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ResultCard&&(identical(other.vacancy, vacancy) || other.vacancy == vacancy)&&(identical(other.company, company) || other.company == company)&&(identical(other.owner, owner) || other.owner == owner)&&const DeepCollectionEquality().equals(other.reviews, reviews)&&(identical(other.letter, letter) || other.letter == letter)&&(identical(other.brief, brief) || other.brief == brief)&&(identical(other.meta, meta) || other.meta == meta));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ResultCard&&(identical(other.vacancy, vacancy) || other.vacancy == vacancy)&&(identical(other.company, company) || other.company == company)&&(identical(other.owner, owner) || other.owner == owner)&&const DeepCollectionEquality().equals(other.reviews, reviews)&&(identical(other.letter, letter) || other.letter == letter)&&(identical(other.brief, brief) || other.brief == brief)&&const DeepCollectionEquality().equals(other.contacts, contacts)&&(identical(other.meta, meta) || other.meta == meta));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,vacancy,company,owner,const DeepCollectionEquality().hash(reviews),letter,brief,meta);
+int get hashCode => Object.hash(runtimeType,vacancy,company,owner,const DeepCollectionEquality().hash(reviews),letter,brief,const DeepCollectionEquality().hash(contacts),meta);
 
 @override
 String toString() {
-  return 'ResultCard(vacancy: $vacancy, company: $company, owner: $owner, reviews: $reviews, letter: $letter, brief: $brief, meta: $meta)';
+  return 'ResultCard(vacancy: $vacancy, company: $company, owner: $owner, reviews: $reviews, letter: $letter, brief: $brief, contacts: $contacts, meta: $meta)';
 }
 
 
@@ -3423,7 +3707,7 @@ abstract mixin class $ResultCardCopyWith<$Res>  {
   factory $ResultCardCopyWith(ResultCard value, $Res Function(ResultCard) _then) = _$ResultCardCopyWithImpl;
 @useResult
 $Res call({
- Vacancy vacancy, Company? company, Owner? owner, List<Review> reviews, Letter? letter, Brief? brief, CardMeta meta
+ Vacancy vacancy, Company? company, Owner? owner, List<Review> reviews, Letter? letter, Brief? brief, List<ContactCandidate> contacts, CardMeta meta
 });
 
 
@@ -3440,7 +3724,7 @@ class _$ResultCardCopyWithImpl<$Res>
 
 /// Create a copy of ResultCard
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? vacancy = null,Object? company = freezed,Object? owner = freezed,Object? reviews = null,Object? letter = freezed,Object? brief = freezed,Object? meta = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? vacancy = null,Object? company = freezed,Object? owner = freezed,Object? reviews = null,Object? letter = freezed,Object? brief = freezed,Object? contacts = null,Object? meta = null,}) {
   return _then(_self.copyWith(
 vacancy: null == vacancy ? _self.vacancy : vacancy // ignore: cast_nullable_to_non_nullable
 as Vacancy,company: freezed == company ? _self.company : company // ignore: cast_nullable_to_non_nullable
@@ -3448,7 +3732,8 @@ as Company?,owner: freezed == owner ? _self.owner : owner // ignore: cast_nullab
 as Owner?,reviews: null == reviews ? _self.reviews : reviews // ignore: cast_nullable_to_non_nullable
 as List<Review>,letter: freezed == letter ? _self.letter : letter // ignore: cast_nullable_to_non_nullable
 as Letter?,brief: freezed == brief ? _self.brief : brief // ignore: cast_nullable_to_non_nullable
-as Brief?,meta: null == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
+as Brief?,contacts: null == contacts ? _self.contacts : contacts // ignore: cast_nullable_to_non_nullable
+as List<ContactCandidate>,meta: null == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
 as CardMeta,
   ));
 }
@@ -3600,10 +3885,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Vacancy vacancy,  Company? company,  Owner? owner,  List<Review> reviews,  Letter? letter,  Brief? brief,  CardMeta meta)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Vacancy vacancy,  Company? company,  Owner? owner,  List<Review> reviews,  Letter? letter,  Brief? brief,  List<ContactCandidate> contacts,  CardMeta meta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ResultCard() when $default != null:
-return $default(_that.vacancy,_that.company,_that.owner,_that.reviews,_that.letter,_that.brief,_that.meta);case _:
+return $default(_that.vacancy,_that.company,_that.owner,_that.reviews,_that.letter,_that.brief,_that.contacts,_that.meta);case _:
   return orElse();
 
 }
@@ -3621,10 +3906,10 @@ return $default(_that.vacancy,_that.company,_that.owner,_that.reviews,_that.lett
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Vacancy vacancy,  Company? company,  Owner? owner,  List<Review> reviews,  Letter? letter,  Brief? brief,  CardMeta meta)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Vacancy vacancy,  Company? company,  Owner? owner,  List<Review> reviews,  Letter? letter,  Brief? brief,  List<ContactCandidate> contacts,  CardMeta meta)  $default,) {final _that = this;
 switch (_that) {
 case _ResultCard():
-return $default(_that.vacancy,_that.company,_that.owner,_that.reviews,_that.letter,_that.brief,_that.meta);case _:
+return $default(_that.vacancy,_that.company,_that.owner,_that.reviews,_that.letter,_that.brief,_that.contacts,_that.meta);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3641,10 +3926,10 @@ return $default(_that.vacancy,_that.company,_that.owner,_that.reviews,_that.lett
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Vacancy vacancy,  Company? company,  Owner? owner,  List<Review> reviews,  Letter? letter,  Brief? brief,  CardMeta meta)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Vacancy vacancy,  Company? company,  Owner? owner,  List<Review> reviews,  Letter? letter,  Brief? brief,  List<ContactCandidate> contacts,  CardMeta meta)?  $default,) {final _that = this;
 switch (_that) {
 case _ResultCard() when $default != null:
-return $default(_that.vacancy,_that.company,_that.owner,_that.reviews,_that.letter,_that.brief,_that.meta);case _:
+return $default(_that.vacancy,_that.company,_that.owner,_that.reviews,_that.letter,_that.brief,_that.contacts,_that.meta);case _:
   return null;
 
 }
@@ -3656,7 +3941,7 @@ return $default(_that.vacancy,_that.company,_that.owner,_that.reviews,_that.lett
 @JsonSerializable()
 
 class _ResultCard implements ResultCard {
-  const _ResultCard({required this.vacancy, this.company, this.owner, final  List<Review> reviews = const <Review>[], this.letter, this.brief, required this.meta}): _reviews = reviews;
+  const _ResultCard({required this.vacancy, this.company, this.owner, final  List<Review> reviews = const <Review>[], this.letter, this.brief, final  List<ContactCandidate> contacts = const <ContactCandidate>[], required this.meta}): _reviews = reviews,_contacts = contacts;
   factory _ResultCard.fromJson(Map<String, dynamic> json) => _$ResultCardFromJson(json);
 
 @override final  Vacancy vacancy;
@@ -3671,6 +3956,13 @@ class _ResultCard implements ResultCard {
 
 @override final  Letter? letter;
 @override final  Brief? brief;
+ final  List<ContactCandidate> _contacts;
+@override@JsonKey() List<ContactCandidate> get contacts {
+  if (_contacts is EqualUnmodifiableListView) return _contacts;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_contacts);
+}
+
 @override final  CardMeta meta;
 
 /// Create a copy of ResultCard
@@ -3686,16 +3978,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ResultCard&&(identical(other.vacancy, vacancy) || other.vacancy == vacancy)&&(identical(other.company, company) || other.company == company)&&(identical(other.owner, owner) || other.owner == owner)&&const DeepCollectionEquality().equals(other._reviews, _reviews)&&(identical(other.letter, letter) || other.letter == letter)&&(identical(other.brief, brief) || other.brief == brief)&&(identical(other.meta, meta) || other.meta == meta));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ResultCard&&(identical(other.vacancy, vacancy) || other.vacancy == vacancy)&&(identical(other.company, company) || other.company == company)&&(identical(other.owner, owner) || other.owner == owner)&&const DeepCollectionEquality().equals(other._reviews, _reviews)&&(identical(other.letter, letter) || other.letter == letter)&&(identical(other.brief, brief) || other.brief == brief)&&const DeepCollectionEquality().equals(other._contacts, _contacts)&&(identical(other.meta, meta) || other.meta == meta));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,vacancy,company,owner,const DeepCollectionEquality().hash(_reviews),letter,brief,meta);
+int get hashCode => Object.hash(runtimeType,vacancy,company,owner,const DeepCollectionEquality().hash(_reviews),letter,brief,const DeepCollectionEquality().hash(_contacts),meta);
 
 @override
 String toString() {
-  return 'ResultCard(vacancy: $vacancy, company: $company, owner: $owner, reviews: $reviews, letter: $letter, brief: $brief, meta: $meta)';
+  return 'ResultCard(vacancy: $vacancy, company: $company, owner: $owner, reviews: $reviews, letter: $letter, brief: $brief, contacts: $contacts, meta: $meta)';
 }
 
 
@@ -3706,7 +3998,7 @@ abstract mixin class _$ResultCardCopyWith<$Res> implements $ResultCardCopyWith<$
   factory _$ResultCardCopyWith(_ResultCard value, $Res Function(_ResultCard) _then) = __$ResultCardCopyWithImpl;
 @override @useResult
 $Res call({
- Vacancy vacancy, Company? company, Owner? owner, List<Review> reviews, Letter? letter, Brief? brief, CardMeta meta
+ Vacancy vacancy, Company? company, Owner? owner, List<Review> reviews, Letter? letter, Brief? brief, List<ContactCandidate> contacts, CardMeta meta
 });
 
 
@@ -3723,7 +4015,7 @@ class __$ResultCardCopyWithImpl<$Res>
 
 /// Create a copy of ResultCard
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? vacancy = null,Object? company = freezed,Object? owner = freezed,Object? reviews = null,Object? letter = freezed,Object? brief = freezed,Object? meta = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? vacancy = null,Object? company = freezed,Object? owner = freezed,Object? reviews = null,Object? letter = freezed,Object? brief = freezed,Object? contacts = null,Object? meta = null,}) {
   return _then(_ResultCard(
 vacancy: null == vacancy ? _self.vacancy : vacancy // ignore: cast_nullable_to_non_nullable
 as Vacancy,company: freezed == company ? _self.company : company // ignore: cast_nullable_to_non_nullable
@@ -3731,7 +4023,8 @@ as Company?,owner: freezed == owner ? _self.owner : owner // ignore: cast_nullab
 as Owner?,reviews: null == reviews ? _self._reviews : reviews // ignore: cast_nullable_to_non_nullable
 as List<Review>,letter: freezed == letter ? _self.letter : letter // ignore: cast_nullable_to_non_nullable
 as Letter?,brief: freezed == brief ? _self.brief : brief // ignore: cast_nullable_to_non_nullable
-as Brief?,meta: null == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
+as Brief?,contacts: null == contacts ? _self._contacts : contacts // ignore: cast_nullable_to_non_nullable
+as List<ContactCandidate>,meta: null == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
 as CardMeta,
   ));
 }

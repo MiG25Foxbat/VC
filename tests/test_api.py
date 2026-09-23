@@ -208,8 +208,11 @@ def test_prepare_blanks_letter_that_addresses_a_name_not_in_the_dossier():
 
     async def fake_write_letter(profile, vacancy, dossier, *, settings):
         # модель нарушает собственную инструкцию и всё равно пишет письмо
+        # во всех трёх форматах, не только в "text"
         return Letter(
             text="Алексей, добрый день...",
+            platform="Алексей, откликаюсь на вакансию...",
+            message="Алексей, привет!",
             facts=[LetterFact(claim="выдуманное утверждение", source_url="https://example.test")],
         )
 
@@ -236,6 +239,8 @@ def test_prepare_blanks_letter_that_addresses_a_name_not_in_the_dossier():
     data = resp.json()
     assert data["owner"] is None
     assert data["letter"]["text"] == ""
+    assert data["letter"]["platform"] == ""
+    assert data["letter"]["message"] == ""
     assert data["letter"]["facts"] == []
 
 
@@ -354,3 +359,78 @@ def test_forget_deletes_from_cache():
 
     resp_again = client.post("/forget", json={"cache_key": cache_key})
     assert resp_again.json() == {"deleted": False}
+
+
+def test_prepare_resolves_confirmed_contact_from_vacancy_description():
+    # Контакт, написанный работодателем прямо в тексте вакансии — самый
+    # надёжный источник, не догадка. Должен прийти с confidence="confirmed".
+    payload = {
+        "vacancy_id": "with-contact-1",
+        "source": "trudvsem",
+        "title": "Бизнес-ассистент",
+        "url": "https://trudvsem.ru/x",
+        "description": "Присылайте резюме на ivan@romashka.ru или пишите в телеграм @ivan_hr.",
+    }
+    resp = client.post("/prepare", json=payload)
+
+    assert resp.status_code == 200
+    contacts = resp.json()["contacts"]
+    by_kind = {c["kind"]: c for c in contacts}
+    assert by_kind["email"]["value"] == "ivan@romashka.ru"
+    assert by_kind["email"]["confidence"] == "confirmed"
+    assert by_kind["email"]["source"] == "вакансия"
+    assert by_kind["telegram"]["value"] == "@ivan_hr"
+    # ссылка на саму вакансию тоже входит как подтверждённый контакт —
+    # именно туда уходит "platform"-формат письма
+    assert by_kind["url"]["value"] == "https://trudvsem.ru/x"
+
+
+def test_prepare_does_not_mistake_email_domain_for_telegram_handle():
+    # "@handle" ищем только когда перед @ нет буквы/точки/дефиса — иначе
+    # хвост email ("...@romashka.ru") ложно распознаётся как telegram.
+    payload = {
+        "vacancy_id": "email-only-1",
+        "source": "trudvsem",
+        "title": "Бизнес-ассистент",
+        "url": "https://trudvsem.ru/x",
+        "description": "Пишите на ivan@romashka.ru",
+    }
+    resp = client.post("/prepare", json=payload)
+
+    assert resp.status_code == 200
+    kinds = [c["kind"] for c in resp.json()["contacts"]]
+    assert "telegram" not in kinds
+
+
+def test_prepare_adds_owner_as_unverified_contact_when_found_in_egrul():
+    # Руководитель по ЕГРЮЛ — это имя из реестра, не подтверждённый канал
+    # связи. Должен прийти последним и с confidence="verify", не "confirmed".
+    import dataclasses
+
+    import server.api.main as main_module
+    from server.models import Owner
+
+    async def fake_enrich_company(*, company_name, company_inn, dadata_token):
+        owner = Owner(full_name="Иванов Иван Иванович", role="Генеральный директор", source="ЕГРЮЛ")
+        return None, owner, 0.0, 0.7
+
+    fake_settings = dataclasses.replace(main_module.settings, llm_api_key="")
+    with (
+        patch.object(main_module, "settings", new=fake_settings),
+        patch("server.api.main.enrich_company", new=fake_enrich_company),
+    ):
+        payload = {
+            "vacancy_id": "egrul-owner-1",
+            "source": "trudvsem",
+            "title": "Бизнес-ассистент",
+            "url": "https://trudvsem.ru/x",
+            "company_name": "ООО Ромашка",
+        }
+        resp = client.post("/prepare", json=payload)
+
+    assert resp.status_code == 200
+    contacts = resp.json()["contacts"]
+    owner_contact = next(c for c in contacts if c["kind"] == "name")
+    assert owner_contact["value"] == "Иванов Иван Иванович"
+    assert owner_contact["confidence"] == "verify"
+    assert owner_contact["source"] == "ЕГРЮЛ"

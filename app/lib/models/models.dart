@@ -127,10 +127,30 @@ abstract class LetterFact with _$LetterFact {
 abstract class Letter with _$Letter {
   const factory Letter({
     required String text,
+    @Default('') String platform,
+    @Default('') String message,
     @Default(<LetterFact>[]) List<LetterFact> facts,
   }) = _Letter;
 
   factory Letter.fromJson(Map<String, dynamic> json) => _$LetterFromJson(json);
+}
+
+/// Контакт с прозрачной проверкой: confirmed — прямо из текста вакансии
+/// или сама вакансия, likely — со страницы компании, verify — имя из
+/// реестра (ЕГРЮЛ), не подтверждённый канал связи.
+@freezed
+abstract class ContactCandidate with _$ContactCandidate {
+  const factory ContactCandidate({
+    required String label,
+    String? role,
+    required String value,
+    required String kind,
+    required String source,
+    required String confidence,
+  }) = _ContactCandidate;
+
+  factory ContactCandidate.fromJson(Map<String, dynamic> json) =>
+      _$ContactCandidateFromJson(json);
 }
 
 @freezed
@@ -176,6 +196,7 @@ abstract class ResultCard with _$ResultCard {
     @Default(<Review>[]) List<Review> reviews,
     Letter? letter,
     Brief? brief,
+    @Default(<ContactCandidate>[]) List<ContactCandidate> contacts,
     required CardMeta meta,
   }) = _ResultCard;
 

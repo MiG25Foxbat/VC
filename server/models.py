@@ -84,7 +84,26 @@ class LetterFact(BaseModel):
 
 class Letter(BaseModel):
     text: str
+    platform: str = ""
+    message: str = ""
     facts: list[LetterFact] = Field(default_factory=list)
+
+
+class ContactCandidate(BaseModel):
+    """Один вариант "куда писать" с прозрачной проверкой источника.
+
+    confidence: "confirmed" — контакт прямо из текста вакансии или сама
+    вакансия; "likely" — со страницы/из карточки компании; "verify" —
+    имя из реестра (ЕГРЮЛ), не подтверждённый канал связи, до отправки
+    стоит перепроверить, что это тот самый человек.
+    """
+
+    label: str
+    role: str | None = None
+    value: str
+    kind: str  # email | phone | telegram | url | name
+    source: str
+    confidence: str  # confirmed | likely | verify
 
 
 class Brief(BaseModel):
@@ -113,4 +132,5 @@ class ResultCard(BaseModel):
     reviews: list[Review] = Field(default_factory=list)
     letter: Letter | None = None
     brief: Brief | None = None
+    contacts: list[ContactCandidate] = Field(default_factory=list)
     meta: Meta

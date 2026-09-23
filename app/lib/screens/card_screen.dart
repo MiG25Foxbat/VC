@@ -23,19 +23,33 @@ class CardScreen extends ConsumerStatefulWidget {
   ConsumerState<CardScreen> createState() => _CardScreenState();
 }
 
+const _formatSegments = [
+  ButtonSegment(value: 0, label: Text('Email')),
+  ButtonSegment(value: 1, label: Text('Площадка')),
+  ButtonSegment(value: 2, label: Text('Сообщение')),
+];
+
 class _CardScreenState extends ConsumerState<CardScreen> {
   QueueRecord? _record;
   bool _loading = false;
   String? _error;
-  late final TextEditingController _letterController;
+  int _formatIndex = 0;
+  late final TextEditingController _textController;
+  late final TextEditingController _platformController;
+  late final TextEditingController _messageController;
+
+  TextEditingController get _activeController =>
+      [_textController, _platformController, _messageController][_formatIndex];
 
   @override
   void initState() {
     super.initState();
-    _letterController = TextEditingController();
+    _textController = TextEditingController();
+    _platformController = TextEditingController();
+    _messageController = TextEditingController();
     _record = widget.initialRecord;
     if (_record != null) {
-      _letterController.text = _record!.card.letter?.text ?? '';
+      _fillLetterControllers(_record!.card.letter);
     } else {
       _loadOrPrepare();
     }
@@ -43,8 +57,16 @@ class _CardScreenState extends ConsumerState<CardScreen> {
 
   @override
   void dispose() {
-    _letterController.dispose();
+    _textController.dispose();
+    _platformController.dispose();
+    _messageController.dispose();
     super.dispose();
+  }
+
+  void _fillLetterControllers(Letter? letter) {
+    _textController.text = letter?.text ?? '';
+    _platformController.text = letter?.platform ?? '';
+    _messageController.text = letter?.message ?? '';
   }
 
   Future<void> _loadOrPrepare() async {
@@ -53,7 +75,7 @@ class _CardScreenState extends ConsumerState<CardScreen> {
     if (cached != null) {
       setState(() {
         _record = cached;
-        _letterController.text = cached.card.letter?.text ?? '';
+        _fillLetterControllers(cached.card.letter);
       });
       return;
     }
@@ -93,7 +115,7 @@ class _CardScreenState extends ConsumerState<CardScreen> {
       if (!mounted) return;
       setState(() {
         _record = record;
-        _letterController.text = card.letter?.text ?? '';
+        _fillLetterControllers(card.letter);
         _loading = false;
       });
     } on ApiException catch (e) {
@@ -114,9 +136,14 @@ class _CardScreenState extends ConsumerState<CardScreen> {
   Future<void> _saveEditedLetter() async {
     final record = _record;
     if (record == null) return;
+    // Сохраняем все три формата разом, не только тот, что сейчас открыт —
+    // правки в остальных вкладках не должны потеряться при переключении.
     final edited = record.card.copyWith(
-      letter: record.card.letter?.copyWith(text: _letterController.text) ??
-          Letter(text: _letterController.text, facts: const []),
+      letter: (record.card.letter ?? const Letter(text: '')).copyWith(
+        text: _textController.text,
+        platform: _platformController.text,
+        message: _messageController.text,
+      ),
     );
     final updated = record.copyWith(card: edited);
     await ref.read(queueProvider.notifier).upsert(updated);
@@ -185,10 +212,12 @@ class _CardScreenState extends ConsumerState<CardScreen> {
         const SizedBox(height: 16),
         if (card.company != null) _CompanySection(company: card.company!),
         if (card.owner != null) _OwnerSection(owner: card.owner!),
+        if (card.contacts.isNotEmpty) _ContactsSection(contacts: card.contacts),
         const SizedBox(height: 16),
         Text('Письмо', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        if (card.letter == null || card.letter!.text.isEmpty)
+        if (card.letter == null ||
+            (card.letter!.text.isEmpty && card.letter!.platform.isEmpty && card.letter!.message.isEmpty))
           const Card(
             child: Padding(
               padding: EdgeInsets.all(16),
@@ -201,8 +230,15 @@ class _CardScreenState extends ConsumerState<CardScreen> {
             ),
           )
         else ...[
+          SegmentedButton<int>(
+            segments: _formatSegments,
+            selected: {_formatIndex},
+            onSelectionChanged: (s) => setState(() => _formatIndex = s.first),
+          ),
+          const SizedBox(height: 8),
           TextField(
-            controller: _letterController,
+            key: ValueKey(_formatIndex),
+            controller: _activeController,
             maxLines: null,
             minLines: 6,
             decoration: const InputDecoration(border: OutlineInputBorder()),
@@ -315,6 +351,72 @@ class _OwnerSection extends StatelessWidget {
             if (owner.source != null) Text('Источник: ${owner.source}', style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ContactsSection extends StatelessWidget {
+  const _ContactsSection({required this.contacts});
+  final List<ContactCandidate> contacts;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Куда писать', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            for (final c in contacts) _ContactRow(contact: c),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ContactRow extends StatelessWidget {
+  const _ContactRow({required this.contact});
+  final ContactCandidate contact;
+
+  (String, Color) _badge() => switch (contact.confidence) {
+        'confirmed' => ('подтверждено', Colors.green),
+        'likely' => ('вероятно', Colors.orange),
+        _ => ('проверить', Colors.blueGrey),
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, color) = _badge();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(contact.value, style: Theme.of(context).textTheme.bodyMedium),
+                Text(
+                  '${contact.label} · источник: ${contact.source}',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Theme.of(context).colorScheme.outline),
+                ),
+              ],
+            ),
+          ),
+          Chip(
+            label: Text(label, style: const TextStyle(fontSize: 11, color: Colors.white)),
+            backgroundColor: color,
+            visualDensity: VisualDensity.compact,
+          ),
+        ],
       ),
     );
   }

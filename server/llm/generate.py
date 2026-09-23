@@ -45,7 +45,12 @@ async def write_letter(profile: str, vacancy: str, dossier: str, *, settings: Se
         temperature=0.4,
     )
     facts = [LetterFact(**f) for f in raw.get("facts", []) if f.get("claim") and f.get("source_url")]
-    return Letter(text=raw.get("text", ""), facts=facts)
+    return Letter(
+        text=raw.get("text", ""),
+        platform=raw.get("platform", ""),
+        message=raw.get("message", ""),
+        facts=facts,
+    )
 
 
 async def write_brief(vacancy: str, dossier: str, *, settings: Settings) -> Brief:

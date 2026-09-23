@@ -167,6 +167,8 @@ Map<String, dynamic> _$LetterFactToJson(_LetterFact instance) =>
 
 _Letter _$LetterFromJson(Map<String, dynamic> json) => _Letter(
   text: json['text'] as String,
+  platform: json['platform'] as String? ?? '',
+  message: json['message'] as String? ?? '',
   facts:
       (json['facts'] as List<dynamic>?)
           ?.map((e) => LetterFact.fromJson(e as Map<String, dynamic>))
@@ -176,8 +178,30 @@ _Letter _$LetterFromJson(Map<String, dynamic> json) => _Letter(
 
 Map<String, dynamic> _$LetterToJson(_Letter instance) => <String, dynamic>{
   'text': instance.text,
+  'platform': instance.platform,
+  'message': instance.message,
   'facts': instance.facts,
 };
+
+_ContactCandidate _$ContactCandidateFromJson(Map<String, dynamic> json) =>
+    _ContactCandidate(
+      label: json['label'] as String,
+      role: json['role'] as String?,
+      value: json['value'] as String,
+      kind: json['kind'] as String,
+      source: json['source'] as String,
+      confidence: json['confidence'] as String,
+    );
+
+Map<String, dynamic> _$ContactCandidateToJson(_ContactCandidate instance) =>
+    <String, dynamic>{
+      'label': instance.label,
+      'role': instance.role,
+      'value': instance.value,
+      'kind': instance.kind,
+      'source': instance.source,
+      'confidence': instance.confidence,
+    };
 
 _Brief _$BriefFromJson(Map<String, dynamic> json) => _Brief(
   questions:
@@ -248,6 +272,11 @@ _ResultCard _$ResultCardFromJson(Map<String, dynamic> json) => _ResultCard(
       json['brief'] == null
           ? null
           : Brief.fromJson(json['brief'] as Map<String, dynamic>),
+  contacts:
+      (json['contacts'] as List<dynamic>?)
+          ?.map((e) => ContactCandidate.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const <ContactCandidate>[],
   meta: CardMeta.fromJson(json['meta'] as Map<String, dynamic>),
 );
 
@@ -259,6 +288,7 @@ Map<String, dynamic> _$ResultCardToJson(_ResultCard instance) =>
       'reviews': instance.reviews,
       'letter': instance.letter,
       'brief': instance.brief,
+      'contacts': instance.contacts,
       'meta': instance.meta,
     };
 

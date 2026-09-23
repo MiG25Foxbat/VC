@@ -93,7 +93,10 @@ class _PasteVacancyScreenState extends ConsumerState<PasteVacancyScreen> {
   String _buildDescription() {
     final extracted = _extracted;
     if (extracted == null) return '';
-    final parts = <String>[];
+    // Сырой вставленный текст идёт первым: контакт для отклика часто
+    // написан в свободной части текста, а не в списках обязанностей —
+    // структурированные пункты его бы потеряли.
+    final parts = <String>[_rawTextController.text.trim()];
     if (extracted.duties.isNotEmpty) {
       parts.add('Обязанности:\n${extracted.duties.map((d) => '- $d').join('\n')}');
     }
@@ -109,8 +112,8 @@ class _PasteVacancyScreenState extends ConsumerState<PasteVacancyScreen> {
   Future<void> _prepare() async {
     final title = _titleController.text.trim();
     final companyName = _companyController.text.trim();
-    if (title.isEmpty || companyName.isEmpty) {
-      setState(() => _error = 'Название вакансии и компания обязательны — заполни или поправь вручную.');
+    if (title.isEmpty) {
+      setState(() => _error = 'Название вакансии обязательно — заполни или поправь вручную.');
       return;
     }
     setState(() {
@@ -123,7 +126,7 @@ class _PasteVacancyScreenState extends ConsumerState<PasteVacancyScreen> {
       final vacancy = SearchResultItem(
         id: id,
         title: title,
-        companyName: companyName,
+        companyName: companyName.isEmpty ? null : companyName,
         salaryFrom: int.tryParse(_salaryFromController.text.trim()),
         salaryTo: int.tryParse(_salaryToController.text.trim()),
         location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
@@ -139,7 +142,7 @@ class _PasteVacancyScreenState extends ConsumerState<PasteVacancyScreen> {
           profileText: profileText.isEmpty ? null : profileText,
           title: title,
           url: url,
-          companyName: companyName,
+          companyName: vacancy.companyName,
           salaryFrom: vacancy.salaryFrom,
           salaryTo: vacancy.salaryTo,
           location: vacancy.location,
@@ -259,7 +262,7 @@ class _PasteVacancyScreenState extends ConsumerState<PasteVacancyScreen> {
           const SizedBox(height: 12),
           TextField(
             controller: _companyController,
-            decoration: const InputDecoration(labelText: 'Компания *'),
+            decoration: const InputDecoration(labelText: 'Компания (необязательно)'),
           ),
           const SizedBox(height: 12),
           Row(
