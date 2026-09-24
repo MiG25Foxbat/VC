@@ -190,13 +190,14 @@ def test_extract_model_failure_returns_502_not_empty_response():
     assert resp.status_code == 502
 
 
-def test_prepare_blanks_letter_that_addresses_a_name_not_in_the_dossier():
-    # Поймано вживую: одна и та же справка (owner=None, компания —
-    # обычное АО, не ИП) дважды подряд дала модели письмо то пустым (как
-    # требует write_letter.md), то адресованным вымышленному "Алексею".
-    # Раз в справке точно неоткуда взять имя, сервер обязан подстраховать
-    # промпт кодом, а не полагаться, что модель сама всегда соблюдает
-    # правило "нет имени — пустой текст".
+def test_prepare_strips_fabricated_name_but_keeps_rest_of_letter():
+    # Поймано вживую: справка без имени (owner=None, компания — обычное
+    # АО, не ИП) всё равно иногда получала от модели письмо, адресованное
+    # вымышленному "Алексею", хотя write_letter.md прямо просит писать
+    # без личного имени в этом случае. Раньше сервер обнулял письмо
+    # целиком — теперь письмо всё равно должно быть написано (по задаче:
+    # "в любом случае, на основе данных что есть"), поэтому код вырезает
+    # только фабрикованное приветствие, а не выбрасывает факты и текст.
     import dataclasses
 
     import server.api.main as main_module
@@ -207,13 +208,12 @@ def test_prepare_blanks_letter_that_addresses_a_name_not_in_the_dossier():
         return company, None, 0.9, 0.0  # owner=None, как в реальном ответе DaData
 
     async def fake_write_letter(profile, vacancy, dossier, *, settings):
-        # модель нарушает собственную инструкцию и всё равно пишет письмо
-        # во всех трёх форматах, не только в "text"
+        # модель нарушает инструкцию и всё равно подставляет имя от себя
         return Letter(
-            text="Алексей, добрый день...",
-            platform="Алексей, откликаюсь на вакансию...",
+            text="Алексей, у вас интересная вакансия.",
+            platform="Алексей, откликаюсь на вакансию.",
             message="Алексей, привет!",
-            facts=[LetterFact(claim="выдуманное утверждение", source_url="https://example.test")],
+            facts=[LetterFact(claim="реальное утверждение из вакансии", source_url="https://example.test")],
         )
 
     async def fake_write_brief(vacancy, dossier, *, settings):
@@ -238,10 +238,61 @@ def test_prepare_blanks_letter_that_addresses_a_name_not_in_the_dossier():
     assert resp.status_code == 200
     data = resp.json()
     assert data["owner"] is None
-    assert data["letter"]["text"] == ""
-    assert data["letter"]["platform"] == ""
-    assert data["letter"]["message"] == ""
-    assert data["letter"]["facts"] == []
+    for field in ("text", "platform", "message"):
+        assert "Алексей" not in data["letter"][field]
+        assert data["letter"][field].startswith("Добрый день!")
+    # факты со ссылкой на источник — не фабрикация, сохраняются как есть
+    assert len(data["letter"]["facts"]) == 1
+
+
+def test_prepare_writes_letter_without_any_addressable_name():
+    # Ядро задачи: письмо должно писаться даже без личности руководителя,
+    # на основе того, что есть (вакансия + профиль). Модель тут уже
+    # следует правилу и открывает письмо нейтральным приветствием —
+    # эвристика не должна его трогать.
+    import dataclasses
+
+    import server.api.main as main_module
+    from server.models import Brief, Letter, LetterFact
+
+    async def fake_enrich_company(*, company_name, company_inn, dadata_token):
+        return None, None, 0.0, 0.0  # компания вообще не нашлась
+
+    async def fake_write_letter(profile, vacancy, dossier, *, settings):
+        assert "АДРЕСАТ: не найден" in dossier
+        return Letter(
+            text="Добрый день! Увидел вашу вакансию персонального ассистента.",
+            platform="Добрый день! Откликаюсь на вакансию.",
+            message="Здравствуйте! Заинтересовала вакансия.",
+            facts=[LetterFact(claim="факт из текста вакансии", source_url="https://example.test/vacancy")],
+        )
+
+    async def fake_write_brief(vacancy, dossier, *, settings):
+        return Brief()
+
+    fake_settings = dataclasses.replace(main_module.settings, llm_api_key="fake-key")
+    with (
+        patch.object(main_module, "settings", new=fake_settings),
+        patch("server.api.main.enrich_company", new=fake_enrich_company),
+        patch("server.api.main.generate.write_letter", new=fake_write_letter),
+        patch("server.api.main.generate.write_brief", new=fake_write_brief),
+    ):
+        payload = {
+            "vacancy_id": "no-company-1",
+            "source": "manual",
+            "title": "Персональный ассистент",
+            "url": "https://example.test/vacancy",
+        }
+        resp = client.post("/prepare", json=payload)
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["company"] is None
+    assert data["owner"] is None
+    assert data["letter"]["text"] != ""
+    assert data["letter"]["platform"] != ""
+    assert data["letter"]["message"] != ""
+    assert len(data["letter"]["facts"]) == 1
 
 
 def test_prepare_keeps_letter_addressed_to_sole_proprietor_named_in_company_legal_name():

@@ -246,18 +246,19 @@ async def prepare(req: PrepareRequest) -> ResultCard | JSONResponse:
             letter = await generate.write_letter(
                 profile_text, vacancy.model_dump_json(), dossier_block, settings=settings
             )
-            if (letter.text or letter.platform or letter.message) and not _has_addressable_name(
-                company, owner
-            ):
-                # write_letter.md требует пустой текст, если в справке нет
-                # имени — но модель это правило иногда всё же нарушает
-                # (поймано вживую: тот же owner=None дважды подряд дал то
-                # пустое письмо, то письмо на вымышленное имя). Раз в
-                # справке точно неоткуда взять имя, подстраховываемся кодом,
-                # а не только промптом. Все три формата, не только text —
-                # им точно так же не к кому обращаться.
-                log.warning("письмо адресовано кому-то, хотя имени в справке нет — обнуляю")
-                letter = Letter(text="", platform="", message="", facts=[])
+            if not _resolve_addressee(company, owner):
+                # Адресата нет — письмо всё равно должно писаться (на
+                # основе вакансии/профиля, без личного имени), но модель
+                # иногда всё же подставляет имя от себя (поймано вживую).
+                # Не выбрасываем всё письмо целиком — вырезаем только
+                # приветствие с выдуманным именем, остальной текст (живая
+                # деталь, гипотеза, факты) фабрикацией не является.
+                letter = Letter(
+                    text=_strip_fabricated_greeting(letter.text),
+                    platform=_strip_fabricated_greeting(letter.platform),
+                    message=_strip_fabricated_greeting(letter.message),
+                    facts=letter.facts,
+                )
             brief = await generate.write_brief(vacancy.model_dump_json(), dossier_block, settings=settings)
         except Exception as exc:  # ошибка модели не должна ронять карточку целиком
             log.warning("модель не отработала: %s", exc)
@@ -301,17 +302,41 @@ def _load_profile(profile_id: str) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def _has_addressable_name(company: Company | None, owner: Owner | None) -> bool:
-    """Есть ли в справке настоящее имя, к которому можно обратиться в
-    письме: либо найденный руководитель, либо ИП, чьё имя и есть
-    название компании ("ИП Сергиенко Андрей Викторович")."""
+def _resolve_addressee(company: Company | None, owner: Owner | None) -> str | None:
+    """Настоящее имя, к которому можно обратиться в письме: либо
+    найденный руководитель, либо ИП, чьё имя и есть название компании
+    ("ИП Сергиенко Андрей Викторович"). None — значит адресата нет,
+    письмо всё равно пишется, но без личного имени."""
     if owner and owner.full_name:
-        return True
+        return owner.full_name
     if company and company.legal_name:
         name = company.legal_name.upper()
         if name.startswith("ИП ") or "ИНДИВИДУАЛЬНЫЙ ПРЕДПРИНИМАТЕЛЬ" in name:
-            return True
-    return False
+            return company.legal_name
+    return None
+
+
+_GREETING_NAME_RE = re.compile(r"^\s*([А-ЯЁ][а-яё]+)\s*[,!]")
+_GENERIC_GREETING_WORDS = {
+    "добрый", "здравствуйте", "приветствую", "уважаемые", "уважаемый",
+    "уважаемая", "коллеги", "команда",
+}
+
+
+def _strip_fabricated_greeting(text: str) -> str:
+    """Адресата нет, но модель иногда всё равно открывает письмо личным
+    именем ("Алексей, добрый день..."), хотя write_letter.md прямо
+    просит обращаться без имени в этом случае. Ловим только эту
+    ситуацию — первое слово, оканчивающееся запятой/восклицанием,
+    которое не входит в список нейтральных приветствий — и заменяем
+    само приветствие, не трогая остальной текст (там фабрикации нет,
+    это живая деталь и факты со ссылками)."""
+    if not text:
+        return text
+    match = _GREETING_NAME_RE.match(text)
+    if not match or match.group(1).lower() in _GENERIC_GREETING_WORDS:
+        return text
+    return "Добрый день!" + text[match.end() :]
 
 
 _EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+\.[a-zA-Zа-яА-Я]{2,}")
@@ -414,7 +439,18 @@ def _resolve_contacts(vacancy: Vacancy, owner: Owner | None) -> list[ContactCand
 
 
 def _build_dossier_block(vacancy: Vacancy, company, owner) -> str:
-    lines = [f"[вакансия:{vacancy.url}] {vacancy.title}, работодатель: {vacancy.company_name or 'неизвестен'}"]
+    # АДРЕСАТ отдельной строкой и явным текстом — модели надёжнее
+    # получить готовый ответ, чем самой решать по обрывкам ЕГРЮЛ-данных,
+    # есть ли в справке настоящее имя (на этом ловили фабрикацию).
+    addressee = _resolve_addressee(company, owner)
+    if addressee:
+        lines = [f"АДРЕСАТ: {addressee}"]
+    else:
+        lines = [
+            "АДРЕСАТ: не найден. Не выдумывай имя — пиши без личного "
+            "обращения (нейтральное приветствие или обращение к компании/команде)."
+        ]
+    lines.append(f"[вакансия:{vacancy.url}] {vacancy.title}, работодатель: {vacancy.company_name or 'неизвестен'}")
     if company:
         lines.append(
             f"[ЕГРЮЛ] {company.legal_name}, ИНН {company.inn}, "
