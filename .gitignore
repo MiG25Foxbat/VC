@@ -4,6 +4,11 @@
 server/profiles/*.yaml
 !server/profiles/example.yaml
 
+# hr_hunter — исходники-референс, из которых адаптированы server/sources/hh.py
+# и server/sources/telegram_channels.py. Не часть этого проекта: своя БД,
+# .session-файл Telegram (логин-токен аккаунта), отдельные venv на каждый модуль.
+hr_hunter/
+
 # личные заметки для Claude Code
 CLAUDE.local.md
 

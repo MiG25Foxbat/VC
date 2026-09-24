@@ -91,6 +91,72 @@ def test_search_returns_items_from_superjob_when_requested():
     assert data["errors"] == []
 
 
+def test_search_returns_items_from_hh_when_requested():
+    fake = Vacancy(
+        id="3",
+        title="Бизнес-ассистент",
+        url="https://hh.ru/vacancy/3",
+        source="hh.ru",
+        company_name="ООО Ромашка",
+        company_inn=None,
+    )
+    with patch("server.api.main.hh.search", new=AsyncMock(return_value=[fake])):
+        resp = client.post("/search", json={"query": "ассистент", "sources": ["hh.ru"]})
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["items"][0]["title"] == "Бизнес-ассистент"
+    assert data["items"][0]["source"] == "hh.ru"
+    assert data["errors"] == []
+
+
+def test_search_hh_blocked_does_not_break_other_sources():
+    from server.sources.base import SourceUnavailable
+
+    fake_trudvsem = Vacancy(
+        id="1",
+        title="Бизнес-ассистент",
+        url="https://trudvsem.ru/x",
+        source="trudvsem",
+        company_name="ООО Ромашка",
+        company_inn="7712345678",
+    )
+
+    async def boom(*_a, **_kw):
+        raise SourceUnavailable("hh.ru", "заблокирован (403) — hh.ru ограничил запрос")
+
+    with (
+        patch("server.api.main.trudvsem.search", new=AsyncMock(return_value=[fake_trudvsem])),
+        patch("server.api.main.hh.search", new=boom),
+    ):
+        resp = client.post("/search", json={"query": "ассистент", "sources": ["trudvsem", "hh.ru"]})
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["items"]) == 1
+    assert data["items"][0]["source"] == "trudvsem"
+    assert data["errors"] == [{"source": "hh.ru", "reason": "заблокирован (403) — hh.ru ограничил запрос"}]
+
+
+def test_search_returns_items_from_telegram_when_requested():
+    fake = Vacancy(
+        id="it_vakansii_jobs:42",
+        title="Ищем ассистента",
+        url="https://t.me/it_vakansii_jobs/42",
+        source="telegram",
+        company_name=None,
+        company_inn=None,
+    )
+    with patch("server.api.main.telegram_channels.search", new=AsyncMock(return_value=[fake])):
+        resp = client.post("/search", json={"query": "ассистент", "sources": ["telegram"]})
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["items"][0]["title"] == "Ищем ассистента"
+    assert data["items"][0]["source"] == "telegram"
+    assert data["errors"] == []
+
+
 def test_search_superjob_failure_does_not_break_trudvsem_results():
     from server.sources.base import SourceUnavailable
 

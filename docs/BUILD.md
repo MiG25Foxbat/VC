@@ -9,10 +9,13 @@
 ```
 LLM_PROVIDER=google            # google | cerebras | groq | openrouter
 LLM_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
-LLM_MODEL=gemini-3.1-flash-lite  # gemini-2.5-flash снят с публичного доступа (2026-09);
-                                 # lite-модель выбрана ради более высокой суточной квоты
-                                 # бесплатного тарифа — у flash без lite лимит 20 запросов
-                                 # в сутки на модель (не в минуту), этого мало для /prepare,
+LLM_MODEL=gemini-3.5-flash-lite  # gemini-2.5-flash снят с публичного доступа (2026-09);
+                                 # был gemini-3.1-flash-lite, сменили 2026-09-24 —
+                                 # та модель стала стабильно отдавать 503 (перегрузка
+                                 # у Google, известная проблема); lite-версия вообще
+                                 # выбрана ради более высокой суточной квоты бесплатного
+                                 # тарифа — у flash без lite лимит 20 запросов в сутки
+                                 # на модель (не в минуту), этого мало для /prepare,
                                  # который делает два вызова модели за карточку
 LLM_API_KEY=
 
@@ -21,6 +24,8 @@ SUPERJOB_APP_ID=               # заголовок X-Api-App-Id
 
 TELEGRAM_API_ID=               # опционально, для каналов
 TELEGRAM_API_HASH=
+TELEGRAM_SESSION=              # StringSession, не путь к файлу — диск на Render временный
+TELEGRAM_CHANNELS=it_vakansii_jobs  # через запятую, без @ и без t.me/
 
 CACHE_TTL_SECONDS=604800       # 7 суток, жёсткий потолок
 HTTP_TIMEOUT_SECONDS=15
@@ -133,7 +138,8 @@ L3 каскада источников (раздел 4): вакансия, на�
 |---|---|---|
 | Работа России, trudvsem.ru | L0 | Открытое API `opendata.trudvsem.ru/api/v1/vacancies`, ключ не нужен. Отдаёт ИНН работодателя прямо в вакансии. Адаптер: `server/sources/trudvsem.py` |
 | SuperJob | L0 | Открытое API `api.superjob.ru/2.0/vacancies/`, заголовок `X-Api-App-Id` (секретный ключ приложения, регистрация на `api.superjob.ru/register`), 120 запросов в минуту с IP. ИНН работодателя не отдаёт — резолвится по названию через DaData. Адаптер: `server/sources/superjob.py` |
-| Телеграм-каналы | L0 | Telethon, чтение публичных каналов. Разбирается текст поста |
+| hh.ru | — (см. ниже) | **Не официальный API** — тот закрыт для соискателей с апреля 2026. Читает HTML страницы поиска и извлекает встроенный JSON (тег `HH-Lux-InitialState`), не выполняя JS. Это в обход `robots.txt` hh.ru — точечное исключение из правила «не обходить защиту от автоматического доступа», подключено 2026-09-24 по прямому запросу продукта, см. `.claude/skills/add-source/SKILL.md`. Схема недокументирована, может сломаться без предупреждения. Ни ИНН, ни текста вакансии поиск не отдаёт. Адаптер: `server/sources/hh.py` |
+| Телеграм-каналы | L0 | Telethon, чтение публичных каналов. Нет полнотекстового поиска — `query` фильтрует уже прочитанные сообщения по подстроке. Нужна готовая `TELEGRAM_SESSION` (StringSession, не файл — диск на Render временный), интерактивный вход в серверном процессе не делается. Адаптер: `server/sources/telegram_channels.py` |
 | Сайты с разметкой JobPosting | L1 | `<script type="application/ld+json">`, схема schema.org/JobPosting |
 | Остальные | L2 | Селекторы в `sources/config/<name>.yaml` |
 | Не читаются иначе | L3 | Текст страницы в модель, ответ по схеме |

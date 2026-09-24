@@ -19,7 +19,7 @@ from server.config import load_settings
 from server.enrich.company import enrich_company
 from server.llm import generate
 from server.models import Company, ContactCandidate, Confidence, Letter, Meta, Owner, ResultCard, Vacancy
-from server.sources import superjob, trudvsem
+from server.sources import hh, superjob, telegram_channels, trudvsem
 from server.sources.base import SourceUnavailable
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -154,8 +154,33 @@ async def search(req: SearchRequest) -> SearchResponse:
             log.warning("источник недоступен: %s", exc)
             errors.append({"source": exc.source, "reason": exc.reason})
 
+    if "hh.ru" in active_sources:
+        try:
+            found = await hh.search(req.query, limit=req.limit, region=req.region, timeout=settings.http_timeout_seconds)
+            items.extend(found)
+        except SourceUnavailable as exc:
+            log.warning("источник недоступен: %s", exc)
+            errors.append({"source": exc.source, "reason": exc.reason})
+
+    if "telegram" in active_sources:
+        try:
+            found = await telegram_channels.search(
+                req.query,
+                limit=req.limit,
+                region=req.region,
+                timeout=settings.http_timeout_seconds,
+                api_id=settings.telegram_api_id,
+                api_hash=settings.telegram_api_hash,
+                session=settings.telegram_session,
+                channels=settings.telegram_channels,
+            )
+            items.extend(found)
+        except SourceUnavailable as exc:
+            log.warning("источник недоступен: %s", exc)
+            errors.append({"source": exc.source, "reason": exc.reason})
+
     for name in active_sources:
-        if name not in ("trudvsem", "superjob"):
+        if name not in ("trudvsem", "superjob", "hh.ru", "telegram"):
             errors.append({"source": name, "reason": "источник ещё не подключён"})
 
     if req.salary_from:

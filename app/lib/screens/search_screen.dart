@@ -21,6 +21,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   final _salaryController = TextEditingController();
   bool _useTrudvsem = true;
   bool _useSuperjob = true;
+  bool _useHh = true;
+  bool _useTelegram = false;
 
   @override
   void dispose() {
@@ -33,7 +35,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Future<void> _submit() async {
     final query = _queryController.text.trim();
     if (query.isEmpty) return;
-    final sources = [if (_useTrudvsem) 'trudvsem', if (_useSuperjob) 'superjob'];
+    final sources = [
+      if (_useTrudvsem) 'trudvsem',
+      if (_useSuperjob) 'superjob',
+      if (_useHh) 'hh.ru',
+      if (_useTelegram) 'telegram',
+    ];
     final body = SearchRequestBody(
       query: query,
       region: _regionController.text.trim().isEmpty ? null : _regionController.text.trim(),
@@ -98,6 +105,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               value: _useSuperjob,
               onChanged: (v) => setState(() => _useSuperjob = v ?? true),
               title: const Text('SuperJob'),
+              contentPadding: EdgeInsets.zero,
+            ),
+            CheckboxListTile(
+              value: _useHh,
+              onChanged: (v) => setState(() => _useHh = v ?? true),
+              title: const Text('hh.ru'),
+              contentPadding: EdgeInsets.zero,
+            ),
+            CheckboxListTile(
+              value: _useTelegram,
+              onChanged: (v) => setState(() => _useTelegram = v ?? false),
+              title: const Text('Telegram-каналы'),
+              subtitle: const Text('нужна настройка TELEGRAM_SESSION на сервере'),
               contentPadding: EdgeInsets.zero,
             ),
             const SizedBox(height: 12),
